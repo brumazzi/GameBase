@@ -1,0 +1,20 @@
+en:
+    title:
+        menu:
+            buttons:
+                new_game: New Game
+                load_game: Load Game
+                credits: Credits
+                exit: Exit
+    setting:
+        window:
+            title: Settings
+            resolution: Resolution
+            fullscreen: FullScreen
+            tab:
+                general: General
+                audio: Audio
+                video: Video
+            button:
+                quit: Quit
+                play: Play

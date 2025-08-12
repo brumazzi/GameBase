@@ -1,0 +1,12 @@
+*{
+    FontName: resources/fonts/Courier Prime Bold.ttf;
+}
+
+Window{
+    BackgroundColor: #22262aff;
+    BorderColor: #00000000;
+}
+
+Entry#my_entry {
+    FontSize: 14;
+}

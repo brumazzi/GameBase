@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window size="643 483" style="CLOSE,TITLEBAR,background" title="t:setting.window.title" pos="-1 -1">
+    <Box spacing="4" orientation="VERTICAL">
+        <Notebook size="610 360" selected="2">
+            <ScrolledWindow label="t:setting.window.tab.general">
+            </ScrolledWindow>
+            <ScrolledWindow label="t:setting.window.tab.audio">
+            </ScrolledWindow>
+            <ScrolledWindow label="t:setting.window.tab.video">
+                <Table spacing="4">
+                    <Row>
+                        <Col>
+                            <Label>t:setting.window.resolution</Label>
+                        </Col>
+                        <Col>
+                            <ComboBox id="input-resolution">
+                                <Item>2560x1440</Item>
+                                <Item>1920x1080</Item>
+                                <Item>1440x900</Item>
+                                <Item>1368x768</Item>
+                            </ComboBox>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <Label>t:setting.window.fullscreen</Label>
+                        </Col>
+                        <Col>
+                            <CheckButton id="input-fullscreen"/>
+                        </Col>
+                    </Row>
+                </Table>
+            </ScrolledWindow>
+        </Notebook>
+        <Box spacing="4">
+            <Button id="button-quit">t:setting.window.button.quit</Button>
+            <Button id="button-play">t:setting.window.button.play</Button>
+        </Box>
+    </Box>
+</Window>
