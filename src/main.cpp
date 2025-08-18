@@ -11,26 +11,27 @@
 #include <time.h>
 #include <splash.hpp>
 #include <game.hpp>
+#include <vars.hpp>
 
 int main(){
     game::settings::init("settings.cfg");
     game::translate::load();
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
-    BEGIN_SETTINGS_WINDOW:
-    { // block to load settings window before game start
-        bool endGame = false;
-        sf::RenderWindow window(sf::VideoMode({640,480}), "Settings", 0);
-        window.setFramerateLimit(60);
-        window.resetGLStates();
-        window.setPosition(sf::Vector2i({
-            ((int)desktop.size.x)/2-320,
-            ((int)desktop.size.y)/2-240
-        }));
+    // BEGIN_SETTINGS_WINDOW:
+    // { // block to load settings window before game start
+    //     bool endGame = false;
+    //     sf::RenderWindow window(sf::VideoMode({640,480}), "Settings", 0);
+    //     window.setFramerateLimit(60);
+    //     window.resetGLStates();
+    //     window.setPosition(sf::Vector2i({
+    //         ((int)desktop.size.x)/2-320,
+    //         ((int)desktop.size.y)/2-240
+    //     }));
 
-        if(game::settings::openSettingWindow(window)) return 0;
-    }
-    END_SETTINGS_WINDOW:
+    //     if(game::settings::openSettingWindow(window)) return 0;
+    // }
+    // END_SETTINGS_WINDOW:
 
     game::settings::save("settings.cfg");
 
@@ -49,6 +50,7 @@ int main(){
     window.setView(view);
     window.resetGLStates();
     window.setFramerateLimit(60);
+    window.setVerticalSyncEnabled(game::settings::getProperty<bool>("config.game.vsync"));
 
     // std::thread t = game::resource::loadAll();
     // game::splash::show(window);
@@ -59,11 +61,14 @@ int main(){
     auto texture = game::resource::texture::loadFromFile("res", "wolf-run.png");
 
     {
-        game::Game game;
-        auto *scene = game.addScene("Primary", new game::Scene("default"));
+        game::Game::Ptr game = game::Game::create();
+        // game->loadFromSlot(0);
+        auto scene = game->addScene("Primary", game::Scene::create("default"));
+        auto slots = game->getSlots();
+        sf::Texture tex(*slots[slots.size()-1].image);
+        sf::Sprite spr(tex);
+        spr.setPosition({200, 200});
 
-
-        // auto object = scene->createObject("res", "Object", sf::Vector2f(100, 16), sf::Vector2f((16*5)/2, (16*5)/2), b2_staticBody);
         auto object = scene->createObject("res", "Object", sf::Vector2f(100, 16), sf::Vector2f((16*5)/2, (16*5)/2), b2_dynamicBody);
 
         object->addAnimation("idle", sf::IntRect({64*0, 0},{64, 64}));
@@ -76,7 +81,7 @@ int main(){
         object->addAnimation("idle", sf::IntRect({64*7, 0},{64, 64}));
         object->setAnimation("idle");
         object->setDelay(5);
-        object->sprite().scale({5, 5});
+        object->sprite().scale({15, 15});
 
         game::physic::body::setRestitution("default", object, 0.0);
 
@@ -89,6 +94,12 @@ int main(){
         sprite.setScale({1, -1});
         sprite.setPosition({0, window.getSize().y});
 
+        game::vars::set<std::string>("First", "Value");
+        game::vars::set<long>("Number", 231);
+        game::vars::set<double>("Decimal", 12.6);
+        game::vars::set<bool>("Logic", true);
+
+
         while(window.isOpen()){
             while(const auto event = window.pollEvent()){
                 if(event->is<sf::Event::Closed>()){
@@ -97,22 +108,28 @@ int main(){
 
                 if(event->is<sf::Event::KeyPressed>()){
                     auto keypressed = event->getIf<sf::Event::KeyPressed>();
+                    if(keypressed->code == sf::Keyboard::Key::F12){
+                        // game->createSlots();
+                        game->saveToSlot(window);
+                    }
                 }
             }
 
-            game.update();
+            game->update();
 
-            window.clear(sf::Color(0x123456ff));
+            window.clear(sf::Color(0xff));
+            window.draw(spr);
 
-            game.draw(window);
+            game->draw(window);
 
-            texture.update(window);
-            window.draw(sprite);
+            // texture.update(window);
+            // window.draw(sprite);
             window.display();
         }
     }
 
     game::physic::world::destroy();
     game::resource::unloadAll();
+
     return 0;
 }

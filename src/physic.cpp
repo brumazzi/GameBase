@@ -124,7 +124,7 @@ namespace game{
             }
         }
         namespace body{
-            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, sf::Vector2f size, b2BodyType type, float density, float friction, float restitution, bool fixRotation){
+            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, sf::Vector2f size, b2BodyType type, float density, float friction, float restitution, bool fixRotation){
                 if(!bodyMap[world].contains(bodyName)){
                     if(object){
                         object->setBodyName(bodyName);
@@ -137,7 +137,7 @@ namespace game{
                     bodyMap[world][bodyName].def.fixedRotation = fixRotation;
 
                     bodyMap[world][bodyName].id = b2CreateBody(worldMap[world].id, &bodyMap[world][bodyName].def);
-                    b2Body_SetUserData(bodyMap[world][bodyName].id, static_cast<void*>(object));
+                    b2Body_SetUserData(bodyMap[world][bodyName].id, static_cast<void*>(object.get()));
 
                     b2Polygon box = b2MakeBox(size.x, size.y);
                     b2ShapeDef shapeDef = b2DefaultShapeDef();
@@ -157,21 +157,21 @@ namespace game{
 
                 return bodyMap[world][bodyName].id;
             }
-            b2BodyId& get(std::string world, game::Object* object){
+            b2BodyId& get(std::string world, std::shared_ptr<game::Object> object){
                 return bodyMap[world][object->getBodyName()].id;
             }
             b2BodyId& get(std::string world, std::string body){
                 return bodyMap[world][body].id;
             }
 
-            void destroy(std::string world, game::Object* object){
+            void destroy(std::string world, std::shared_ptr<game::Object> object){
                 destroy(world, object->getBodyName());
             }
             void destroy(std::string world, std::string body){
                 b2DestroyBody(bodyMap[world][body].id);
                 bodyMap[world].erase(body);
             }
-            bool exists(std::string world, game::Object* object){
+            bool exists(std::string world, std::shared_ptr<game::Object> object){
                 return bodyMap[world].contains(object->getBodyName());
             }
             bool exists(std::string world, std::string body){
@@ -183,6 +183,10 @@ namespace game{
             }
             sf::Vector2f getPosition(std::string world, std::string body){
                 b2Vec2 vec = b2Body_GetPosition(bodyMap[world][body].id);
+                return sf::Vector2f(vec.x, vec.y);
+            }
+            sf::Vector2f getVelocity(std::string world, std::string body){
+                b2Vec2 vec = b2Body_GetLinearVelocity(bodyMap[world][body].id);
                 return sf::Vector2f(vec.x, vec.y);
             }
             // sf::Vector2f getSize(std::string world, std::string body){
@@ -209,30 +213,36 @@ namespace game{
                 return b2Body_IsFixedRotation(bodyMap[world][body].id);
             }
 
-            sf::Vector2f getPosition(std::string world, game::Object* object){
+            sf::Vector2f getPosition(std::string world, std::shared_ptr<game::Object> object){
                 return getPosition(world, object->getBodyName());
             }
-            // sf::Vector2f getSize(std::string world, game::Object* object){
+            sf::Vector2f getVelocity(std::string world, std::shared_ptr<game::Object> object){
+                return getVelocity(world, object->getBodyName());
+            }
+            // sf::Vector2f getSize(std::string world, std::shared_ptr<game::Object> object){
             // }
-            b2BodyType getType(std::string world, game::Object* object){
+            b2BodyType getType(std::string world, std::shared_ptr<game::Object> object){
                 return getType(world, object->getBodyName());
             }
-            float getDensity(std::string world, game::Object* object){
+            float getDensity(std::string world, std::shared_ptr<game::Object> object){
                 return getDensity(world, object->getBodyName());
             }
-            float getFriction(std::string world, game::Object* object){
+            float getFriction(std::string world, std::shared_ptr<game::Object> object){
                 return getFriction(world, object->getBodyName());
             }
-            float getRestitution(std::string world, game::Object* object){
+            float getRestitution(std::string world, std::shared_ptr<game::Object> object){
                 return getRestitution(world, object->getBodyName());
             }
-            bool getFixRotation(std::string world, game::Object* object){
+            bool getFixRotation(std::string world, std::shared_ptr<game::Object> object){
                 return getFixRotation(world, object->getBodyName());
             }
 
             void setPosition(std::string world, std::string body, sf::Vector2f position){
                 b2Rot rot = b2Body_GetRotation(bodyMap[world][body].id);
                 b2Body_SetTransform(bodyMap[world][body].id, (b2Vec2){position.x, position.y}, rot);
+            }
+            void setVelocity(std::string world, std::string body, sf::Vector2f velocity){
+                b2Body_SetLinearVelocity(bodyMap[world][body].id, (b2Vec2){velocity.x, velocity.y});
             }
             // void setSize(std::string world, std::string body, sf::Vector2f size){
             // }
@@ -258,24 +268,27 @@ namespace game{
                 b2Body_SetFixedRotation(bodyMap[world][body].id, fixRotation);
             }
 
-            void setPosition(std::string world, game::Object* object, sf::Vector2f position){
+            void setPosition(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f position){
                 setPosition(world, object->getBodyName(), position);
             }
-            // void setSize(std::string world, game::Object* object, sf::Vector2f size){
+            void setVelocity(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f velocity){
+                setVelocity(world, object->getBodyName(), velocity);
+            }
+            // void setSize(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f size){
             // }
-            void setType(std::string world, game::Object* object, b2BodyType type){
+            void setType(std::string world, std::shared_ptr<game::Object> object, b2BodyType type){
                 setType(world, object->getBodyName(), type);
             }
-            void setDensity(std::string world, game::Object* object, float density){
+            void setDensity(std::string world, std::shared_ptr<game::Object> object, float density){
                 setDensity(world, object->getBodyName(), density);
             }
-            void setFriction(std::string world, game::Object* object, float friction){
+            void setFriction(std::string world, std::shared_ptr<game::Object> object, float friction){
                 setFriction(world, object->getBodyName(), friction);
             }
-            void setRestitution(std::string world, game::Object* object, float restitution){
+            void setRestitution(std::string world, std::shared_ptr<game::Object> object, float restitution){
                 setRestitution(world, object->getBodyName(), restitution);
             }
-            void setFixRotation(std::string world, game::Object* object, bool fixRotation){
+            void setFixRotation(std::string world, std::shared_ptr<game::Object> object, bool fixRotation){
                 setFixRotation(world, object->getBodyName(), fixRotation);
             }
         }

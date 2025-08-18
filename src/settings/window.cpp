@@ -9,13 +9,13 @@ namespace game{
         bool openSettingWindow(sf::RenderWindow &window){
             bool endGame = false;
             sfg::SFGUI sfgUI;
-            sfg::XMLWidget XMLWidget;
-            if(!XMLWidget.loadFromFile("./resources/gui/SettingsWindow.xml")){
+            sfg::ui::XMLLoader::Ptr XMLLoader = sfg::ui::XMLLoader::Create();
+            if(!XMLLoader->loadFromFile("./resources/gui/SettingsWindow.xml", &window)){
                 std::cerr << "\"SettingsWindow.xml\" not fount!"  << std::endl;
                 return 1;
             }
 
-            sfg::Widget::Ptr widget = XMLWidget.getWidget();
+            sfg::Widget::Ptr widget = XMLLoader->getWidget();
             if(!widget){
                 std::cerr << "Fail to start settings window!"  << std::endl;
                 return 2;
@@ -26,28 +26,8 @@ namespace game{
                 window.close();
             });
 
-            game::translate::applyToWidget(widget);
-
-            sfg::Button::Ptr buttonPlay = std::dynamic_pointer_cast<sfg::Button>(widget->GetWidgetById("button-play"));
             sfg::Button::Ptr buttonQuit = std::dynamic_pointer_cast<sfg::Button>(widget->GetWidgetById("button-quit"));
-            sfg::CheckButton::Ptr inputFullscreen = std::dynamic_pointer_cast<sfg::CheckButton>(widget->GetWidgetById("input-fullscreen"));
-            sfg::ComboBox::Ptr inputResolution = std::dynamic_pointer_cast<sfg::ComboBox>(widget->GetWidgetById("input-resolution"));
 
-            for(int index = 0; index < inputResolution->GetItemCount(); index++){
-                bool res = !inputResolution->GetItem(index).toUtf32().compare(
-                    sf::String(
-                        std::string(game::settings::getProperty<std::string>("config.style.window.width")) + "x" + std::string(game::settings::getProperty<std::string>("config.style.window.height"))
-                    ).toUtf32()
-                );
-                if(res){
-                    inputResolution->SelectItem(index);
-                    break;
-                }
-            }
-
-            inputFullscreen->SetActive(game::settings::getProperty<bool>("config.style.window.fullscreen"));
-
-            uint buttonPlaySignal = buttonPlay->GetSignal(sfg::Button::OnLeftClick).Connect([&window]{window.close();});
             uint buttonQuitSignal = buttonQuit->GetSignal(sfg::Button::OnLeftClick).Connect([&window, &endGame]{
                 endGame = true;
                 window.close();
@@ -83,21 +63,62 @@ namespace game{
                 sfgUI.Display(window);
                 window.display();
             }
-
             std::dynamic_pointer_cast<sfg::Window>(widget)->GetSignal(sfg::Window::OnCloseButton).Disconnect(
                 std::dynamic_pointer_cast<sfg::Window>(widget)->GetSignal(sfg::Window::OnCloseButton).GetGUID()
             );
-            buttonPlay->GetSignal(sfg::Button::OnLeftClick).Disconnect(buttonPlaySignal);
             buttonQuit->GetSignal(sfg::Button::OnLeftClick).Disconnect(buttonQuitSignal);
-
-            int width=0,height=0;
-            sscanf(inputResolution->GetSelectedText().toAnsiString().c_str(), "%dx%d", &width, &height);
-
-            game::settings::setProperty("config.style.window.fullscreen", inputFullscreen->IsActive());
-            game::settings::setProperty<int>("config.style.window.width", width);
-            game::settings::setProperty<int>("config.style.window.height", height);
 
             return endGame;
         }
     }
+}
+
+// window events
+
+extern "C" void config_windowLoad(sfg::Window::Ptr window, sf::RenderWindow* render){
+    game::translate::applyToWidget(std::dynamic_pointer_cast<sfg::Widget>(window));
+
+    sfg::CheckButton::Ptr inputFullscreen = std::dynamic_pointer_cast<sfg::CheckButton>(window->GetWidgetById("input-fullscreen"));
+    sfg::CheckButton::Ptr inputVSync = std::dynamic_pointer_cast<sfg::CheckButton>(window->GetWidgetById("input-vsync"));
+
+    inputFullscreen->SetActive(game::settings::getProperty<bool>("config.style.window.fullscreen"));
+    inputVSync->SetActive(game::settings::getProperty<bool>("config.game.vsync"));
+
+    sfg::ComboBox::Ptr inputResolution = std::dynamic_pointer_cast<sfg::ComboBox>(window->GetWidgetById("input-resolution"));
+    // std::vector<sf::VideoMode> modes(sf::VideoMode::getFullscreenModes());
+
+    // for(const auto mode: modes){
+    //     std::cout << std::string(mode.size.x+"x"+mode.size.y) << std::endl;
+    //     inputResolution->AppendItem(std::string(mode.size.x+"x"+mode.size.y));
+    // }
+
+    for(int index = 0; index < inputResolution->GetItemCount(); index++){
+        bool res = !inputResolution->GetItem(index).toUtf32().compare(
+            sf::String(
+                std::string(game::settings::getProperty<std::string>("config.style.window.width")) + "x" + std::string(game::settings::getProperty<std::string>("config.style.window.height"))
+            ).toUtf32()
+        );
+        if(res){
+            inputResolution->SelectItem(index);
+            break;
+        }
+    }
+
+}
+extern "C" void config_gamePlay(sfg::Window::Ptr window, sf::RenderWindow* render){
+    render->close();
+}
+extern "C" void config_setResolution(sfg::ComboBox::Ptr combo, sf::RenderWindow* render){
+    int width=0,height=0;
+    sscanf(combo->GetSelectedText().toAnsiString().c_str(), "%dx%d", &width, &height);
+
+    game::settings::setProperty<int>("config.style.window.width", width);
+    game::settings::setProperty<int>("config.style.window.height", height);
+}
+
+extern "C" void config_setFullscreen(sfg::CheckButton::Ptr check, sf::RenderWindow* render){
+    game::settings::setProperty("config.style.window.fullscreen", check->IsActive());
+}
+extern "C" void config_setVSync(sfg::CheckButton::Ptr check, sf::RenderWindow* render){
+    game::settings::setProperty("config.game.vsync", check->IsActive());
 }

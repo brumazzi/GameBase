@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.31.5)
 
 set(CMAKE_CXX_STANDARD 20)
 set(PROJECT_NAME Game)
-set(CMAKE_CXX_FLAGS "-O2 -Wl,-rpath=./lib64 -L./lib64 -g")
+set(CMAKE_CXX_FLAGS "-O2 -Wl,-rpath=./lib64 -L./lib64 -rdynamic -g")
 set(PKG_CONFIG_LIBS sfml-all yaml-cpp)
 set(STATIC_LIBS unistring dl)
 set(SHARED_LIBS m box2d SFGUI tinyxml2 XMLLoader)
@@ -20,6 +20,7 @@ set(SOURCE_FILES
     src/splash.cpp
     src/translate.cpp
     src/utils.cpp
+    src/vars.cpp
     src/settings/window.cpp
 
     # src/Loaders/string.cpp

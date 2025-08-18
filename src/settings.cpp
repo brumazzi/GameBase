@@ -8,6 +8,15 @@
 
 #include <fstream>
 
+#ifdef _WIN32
+#include <windows.h>
+#include <shlobj.h>
+#else
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#endif
+
 static YAML::Node SETTINGS_NODE;
 #define set SETTINGS_NODE
 
@@ -55,6 +64,7 @@ namespace game{
                 set["config"]["style"]["window"]["width"]       = WINDOW_WIDTH;
                 set["config"]["style"]["window"]["height"]      = WINDOW_HEIGHT;
                 set["config"]["style"]["window"]["fullscreen"]  = false;
+                set["config"]["game"]["vsync"]                  = false;
 
                 set["config"]["input"]["keyboard"]["CONFIRM"]   = (int32_t) game::keyboard::buttons::CONFIRM;
                 set["config"]["input"]["keyboard"]["MENU"]      = (int32_t) game::keyboard::buttons::MENU;
@@ -116,6 +126,26 @@ namespace game{
 
             YAML::Node buff = settingsFindRecursive(SETTINGS_NODE, splitedProp, 0);
             buff = value;
+        }
+
+        std::string getHomeDir() {
+        #ifdef _WIN32
+            // Windows: Obtém a pasta AppData
+            char path[MAX_PATH];
+            if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+                return std::string(path);
+            } else {
+                return "";
+            }
+        #else
+            // Linux: Obtém a pasta home do usuário
+            struct passwd *pw = getpwuid(getuid());
+            if (pw && pw->pw_dir) {
+                return std::string(pw->pw_dir);
+            } else {
+                return "";
+            }
+        #endif
         }
 
         template std::string getProperty<std::string>(std::string);

@@ -56,6 +56,26 @@ namespace game{
 
                 return audio;
             }
+            std::string mask(Audio* audio, Audio::Type type){
+                if(type == Audio::Type::MUSIC){
+                    auto it = std::find_if(Musics.begin(), Musics.end(), [&audio](const auto& pair){
+                        return audio == pair.second;
+                    });
+
+                    if(it != Musics.end()){
+                        return it->first;
+                    }
+                }else if(type == Audio::Type::SOUND){
+                    auto it = std::find_if(Sounds.begin(), Sounds.end(), [&audio](const auto& pair){
+                        return audio == pair.second;
+                    });
+
+                    if(it != Sounds.end()){
+                        return it->first;
+                    }
+                }
+                return "";
+            }
         }
 
         namespace texture{
@@ -86,6 +106,15 @@ namespace game{
                 if(!Textures.contains(mask)) return nullptr;
 
                 return Textures[mask];
+            }
+            std::string mask(sf::Texture* texture){
+                auto it = std::find_if(Textures.begin(), Textures.end(), [&texture](const auto& pair){
+                    return texture == pair.second;
+                });
+
+                if(it != Textures.end()){
+                    return it->first;
+                }
             }
         }
 

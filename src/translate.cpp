@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <utils.hpp>
 #include <SFGUI/Widgets.hpp>
-#include <XMLLoader/Loader.hpp>
 
 static YAML::Node Translates;
 
@@ -65,7 +64,7 @@ namespace game{
                 std::string label(w->GetLabel());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetLabel(utf8_to_utf32(t(label)));
+                    w->SetLabel(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("CheckButton")){
                 auto w = std::static_pointer_cast<sfg::CheckButton>(widget);
@@ -73,7 +72,7 @@ namespace game{
                 std::string label(w->GetLabel());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetLabel(utf8_to_utf32(t(label)));
+                    w->SetLabel(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("ComboBox")){
                 auto w = std::static_pointer_cast<sfg::ComboBox>(widget);
@@ -92,7 +91,7 @@ namespace game{
                     w->RemoveItem(0);
                 }
 
-                for(auto item: translatedItems) w->AppendItem(utf8_to_utf32(item));
+                for(auto item: translatedItems) w->AppendItem(game::string::str_to_utf32(item));
             }else if(!widgetType.compare("Fixed")){
                 auto w = std::static_pointer_cast<sfg::Fixed>(widget);
 
@@ -109,7 +108,7 @@ namespace game{
                 }
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetLabel(utf8_to_utf32(t(label)));
+                    w->SetLabel(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("Label")){
                 auto w = std::static_pointer_cast<sfg::Label>(widget);
@@ -117,7 +116,7 @@ namespace game{
                 std::string label(w->GetText());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetText(utf8_to_utf32(t(label)));
+                    w->SetText(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("Notebook")){
                 auto w = std::static_pointer_cast<sfg::Notebook>(widget);
@@ -129,7 +128,7 @@ namespace game{
                     std::string label(page->GetText());
                     if_translate(label){
                         label.erase(0, 2);
-                        page->SetText(utf8_to_utf32(t(label)));
+                        page->SetText(game::string::str_to_utf32(t(label)));
                     }
                 }
             }else if(!widgetType.compare("ProgressBar")){
@@ -140,7 +139,7 @@ namespace game{
                 std::string label(w->GetLabel());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetLabel(utf8_to_utf32(t(label)));
+                    w->SetLabel(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("ScrolledWindow")){
                 auto w = std::static_pointer_cast<sfg::ScrolledWindow>(widget);
@@ -160,7 +159,7 @@ namespace game{
                 std::string label(w->GetLabel());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetLabel(utf8_to_utf32(t(label)));
+                    w->SetLabel(game::string::str_to_utf32(t(label)));
                 }
             }else if(!widgetType.compare("Viewport")){
                 auto w = std::static_pointer_cast<sfg::Viewport>(widget);
@@ -174,7 +173,7 @@ namespace game{
                 std::string label(w->GetTitle());
                 if_translate(label){
                     label.erase(0, 2);
-                    w->SetTitle(utf8_to_utf32(t(label)));
+                    w->SetTitle(game::string::str_to_utf32(t(label)));
                 }
                 for(auto child: w->GetChildren()){
                     applyToWidget(child);

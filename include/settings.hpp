@@ -16,12 +16,15 @@
 
 namespace game{
     namespace settings{
-        void init(std::string confFile);
-        bool save(std::string confFile);
+        void init(std::string confFile = "settings.cfg");
+        bool save(std::string confFile = "settings.cfg");
         template<typename T> T getProperty(std::string prop);
         YAML::Node getPropertyNode(std::string prop);
         YAML::Node& getSettings();
         template<typename T> void setProperty(std::string prop, T value);
+
+        std::string getHomeDir();
+
 
         bool openSettingWindow(sf::RenderWindow &window);
     }

@@ -43,6 +43,7 @@ namespace game{
             // Audio* loadFromMemory(std::string mask,void *buff, std::size_t size, Audio::Type type);
             void remove(std::string mask, Audio::Type type);
             Audio* get(std::string mask, Audio::Type type);
+            std::string mask(Audio* audio, Audio::Type type);
         }
 
         namespace texture{
@@ -50,6 +51,7 @@ namespace game{
             // sf::Texture* loadFromMemory(std::string mask,void *buff, std::size_t size);
             void remove(std::string mask);
             sf::Texture* get(std::string mask);
+            std::string mask(sf::Texture* texture);
         }
 
         std::thread loadAll();

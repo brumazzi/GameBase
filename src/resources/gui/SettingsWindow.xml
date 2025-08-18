@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Window size="643 483" style="CLOSE,TITLEBAR,background" title="t:setting.window.title" pos="-1 -1">
+<Window size="643 483" style="CLOSE,TITLEBAR,background" title="t:setting.window.title" pos="-1 -1" on-create="config_windowLoad">
     <Box spacing="4" orientation="VERTICAL">
         <Notebook size="610 360" selected="2">
             <ScrolledWindow label="t:setting.window.tab.general">
+                <Box spacing="4" orientation="VERTICAL">
+                    <CheckButton id="input-vsync" on-toggle="config_setVSync" label="VSync"/>
+                </Box>
             </ScrolledWindow>
             <ScrolledWindow label="t:setting.window.tab.audio">
             </ScrolledWindow>
@@ -13,7 +16,7 @@
                             <Label>t:setting.window.resolution</Label>
                         </Col>
                         <Col>
-                            <ComboBox id="input-resolution">
+                            <ComboBox id="input-resolution" on-select="config_setResolution">
                                 <Item>2560x1440</Item>
                                 <Item>1920x1080</Item>
                                 <Item>1440x900</Item>
@@ -26,7 +29,7 @@
                             <Label>t:setting.window.fullscreen</Label>
                         </Col>
                         <Col>
-                            <CheckButton id="input-fullscreen"/>
+                            <CheckButton id="input-fullscreen" on-toggle="config_setFullscreen"/>
                         </Col>
                     </Row>
                 </Table>
@@ -34,7 +37,7 @@
         </Notebook>
         <Box spacing="4">
             <Button id="button-quit">t:setting.window.button.quit</Button>
-            <Button id="button-play">t:setting.window.button.play</Button>
+            <Button id="button-play" on-left-click="config_gamePlay">t:setting.window.button.play</Button>
         </Box>
     </Box>
 </Window>

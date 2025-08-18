@@ -3,26 +3,30 @@
 #include <physic.hpp>
 
 namespace game{
+    Object::Ptr Object::create(){ return std::make_shared<game::Object>(); }
+    Object::Ptr Object::create(std::string texture){ return std::make_shared<game::Object>(texture); }
+
     Object::Object(){
         this->m_destroyed = false;
         this->m_drawable = false;
     }
 
     Object::Object(sf::Texture *texture){
-        this->m_sprite = new sf::Sprite(*texture);
+        this->m_sprite = std::make_shared<sf::Sprite>(*texture);
         this->m_animationIndex = 0;
         this->m_destroyed = false;
         this->m_drawable = true;
+        this->m_texture = game::resource::texture::mask(texture);
     }
     Object::Object(std::string texture){
-        this->m_sprite = new sf::Sprite(*resource::texture::get(texture));
+        this->m_sprite = std::make_shared<sf::Sprite>(*resource::texture::get(texture));
         this->m_animationIndex = 0;
         this->m_destroyed = false;
         this->m_drawable = true;
+        this->m_texture = texture;
     }
-    Object::~Object(){
-        delete this->m_sprite;
-    }
+    Object::~Object(){}
+
     sf::Sprite &Object::sprite(){ return *this->m_sprite; }
     void Object::update(){
         if(this->m_destroyed) return;
@@ -58,6 +62,9 @@ namespace game{
         return this->m_drawable;
     }
 
+    AnimationMap Object::animations(){
+        return this->m_animations;
+    }
     void Object::addAnimation(std::string key, sf::IntRect rect){
         this->m_animations[key].emplace_back(rect);
     }
@@ -91,6 +98,9 @@ namespace game{
     void Object::setWorldName(std::string worldName){
         this->m_worldName = worldName;
     }
+    void Object::setSize(sf::Vector2f size){
+        this->m_size = size;
+    }
     uint16_t Object::getDelay(){
         return this->m_animationDelay;
     }
@@ -99,6 +109,12 @@ namespace game{
     }
     std::string Object::getWorldName(){
         return this->m_worldName;
+    }
+    std::string Object::getTextureName(){
+        return this->m_texture;
+    }
+    sf::Vector2f Object::getSize(){
+        return this->m_size;
     }
 
     Object::operator sf::Sprite(){
