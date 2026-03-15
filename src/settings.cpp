@@ -2,7 +2,6 @@
 #include <filesystem>
 #include <buttons.hpp>
 #include <utils.hpp>
-#include <XMLLoader/XMLLoader.hpp>
 
 #include <SFGUI/SFGUI.hpp>
 

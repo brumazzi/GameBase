@@ -1,0 +1,12 @@
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 1024
+AccessModifierOffset: -2
+NamespaceIndentation: All
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: All
+AllowShortBlocksOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+Standard: c++20

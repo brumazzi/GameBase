@@ -1,0 +1,15 @@
+CompileFlags:           # Flags de compilação que o clangd usa para entender seu código
+  Add:                  # Flags que SEMPRE são adicionadas (útil para includes, standards, etc.)
+    - -std=c++20        # ou c++17, c++23, etc. (combine com seu .clang-format Standard)
+    - -Wall
+    - -Wextra
+    - -Wpedantic
+    - -Iinclude         # Se seu projeto tem pasta include/ na raiz
+    - -Ithird_party     # Exemplo de pasta externa
+    - -I./include
+
+  Remove:               # Remove flags ruins vindas do compile_commands.json (ex: -Werror em dev)
+    - -Werror
+    - -fmodules-ts
+    - -fmodule-mapper=*
+    - -fdeps-format=*

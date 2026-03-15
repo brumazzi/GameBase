@@ -7,6 +7,7 @@
 #include <cstring>
 #include <settings.hpp>
 #include <format>
+#include <yaml-cpp/yaml.h>
 
 namespace game{
     enum GameVarType{
@@ -72,6 +73,7 @@ namespace game{
         char            currentScene[32];
         uint64_t        globalVarsCount;
         uint64_t        scenesCount;
+        double          viewLimits[4];
 
         // GameVar*        globalVars;
         // SceneInfo*      scenes;
@@ -174,7 +176,7 @@ namespace game{
         this->m_slots.emplace_back(slot);
         this->m_currentSlotInfo = this->m_slots.size()-1;
     }
-    void Game::updateSlot(sf::Image image){
+    bool Game::updateSlot(sf::Image image){
         float incW=1, incH=1;
         sf::Image newImage({256, 256});
         incW = (float) image.getSize().x/256.0;
@@ -182,7 +184,7 @@ namespace game{
 
         for(uint w=0; w<256; w++){
             for(uint h=0; h<256; h++){
-                newImage.setPixel({w,h}, image.getPixel({w*incW, h*incH}));
+                newImage.setPixel({w,h}, image.getPixel(sf::Vector2u(w*incW, h*incH)));
             }
         }
 
@@ -206,11 +208,18 @@ namespace game{
         savePathImage.append("/shot_"+std::format("{:02}", this->m_currentSlotInfo)+".png");
 
         std::ofstream output(savePath);
-        for(const auto slot: this->m_slots){
-            output.write(reinterpret_cast<const char*>(&slot), sizeof(SlotInfo));
+        if(output.is_open()){
+            for(const auto slot: this->m_slots){
+                output.write(reinterpret_cast<const char*>(&slot), sizeof(SlotInfo));
+            }
+            output.close();
+            if(newImage.saveToFile(savePathImage)){
+                return true;
+            }else{
+                return std::filesystem::remove(savePath) ? false : false;
+            }
         }
-        newImage.saveToFile(savePathImage);
-        output.close();
+        return false;
     }
 
     std::vector<SlotInfo> Game::getSlots(){
@@ -239,8 +248,10 @@ namespace game{
 
                 std::string loadPathImage(dir.generic_string());
                 loadPathImage.append("/shot_"+std::format("{:02}", this->m_currentSlotInfo)+".png");
-                slotInfo.image->loadFromFile(loadPathImage);
-                this->m_slots[this->m_slots.size()-1].image->loadFromFile(std::string(loadPathImage));
+                if(!slotInfo.image->loadFromFile(loadPathImage)){
+                    std::vector<SlotInfo> zeroSlots;
+                    return zeroSlots;
+                }
             }
         }
 
@@ -272,6 +283,10 @@ namespace game{
         std::strcpy(gameData.currentScene, this->m_currentScene.c_str());
         gameData.globalVarsCount = varList.size();
         gameData.scenesCount = this->m_scenes.size();
+        gameData.viewLimits[0] = this->m_viewMinPosition.x;
+        gameData.viewLimits[1] = this->m_viewMinPosition.y;
+        gameData.viewLimits[2] = this->m_viewMaxPosition.x;
+        gameData.viewLimits[3] = this->m_viewMaxPosition.y;
         output.write(reinterpret_cast<const char*>(&gameData), sizeof(GameData));
 
         for(auto var: varList){
@@ -404,6 +419,9 @@ namespace game{
 
         GameData gameData;
         input.read(reinterpret_cast<char*>(&gameData), sizeof(GameData));
+        this->m_currentScene = gameData.currentScene;
+        this->m_viewMinPosition = sf::Vector2f(gameData.viewLimits[0], gameData.viewLimits[1]);
+        this->m_viewMaxPosition = sf::Vector2f(gameData.viewLimits[2], gameData.viewLimits[3]);
 
         while(gameData.globalVarsCount--){
             GameVar gameVar;
@@ -481,6 +499,21 @@ namespace game{
         }
 
         this->m_currentSlotInfo = slot;
+        return true;
+    }
+
+    bool Game::loadSceneFromFile(std::string filePath){
+        // YAML::Node root = YAML::LoadFile(filePath);
+        // this->m_viewMinPosition = sf::Vector2f(WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0);
+        // this->m_viewMaxPosition = sf::Vector2f(
+        //     (root["settings"]["WorldWidth"].as<int>()*root["settings"]["TilemapWidth"].as<int>())-WINDOW_WIDTH/2,
+        //     (root["settings"]["WorldHeight"].as<int>()*root["settings"]["TilemapHeight"].as<int>())-WINDOW_HEIGHT/2
+        // );
+
+        // std::string tilemapName(root["Tilemaps"][0].as<std::string>());
+        // for(auto layer: root["Layers"]){
+
+        // }
         return true;
     }
 }

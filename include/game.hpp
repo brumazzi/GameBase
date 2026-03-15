@@ -11,7 +11,7 @@ namespace game{
         sf::Image*  image;
     }SlotInfo;
 
-    typedef struct __attribute__ ((__packed__)) GameData GameData;
+    typedef struct GameData GameData;
 
     class Game: public std::enable_shared_from_this<Game> {
         public:
@@ -41,16 +41,20 @@ namespace game{
         SceneRenderType getRenderType();
 
         void createSlots();
-        void updateSlot(sf::Image image);
+        bool updateSlot(sf::Image image);
         std::vector<SlotInfo> getSlots();
         bool saveToSlot(sf::RenderWindow& window);
         bool loadFromSlot(uint lot);
+
+        bool loadSceneFromFile(std::string filePath);
 
         private:
         std::map<std::string, game::Scene::Ptr> m_scenes;
         std::string m_currentScene;
         SceneRenderType m_renderType;
         std::vector<SlotInfo> m_slots;
+        sf::Vector2f m_viewMinPosition;
+        sf::Vector2f m_viewMaxPosition;
         int m_currentSlotInfo;
     };
 }

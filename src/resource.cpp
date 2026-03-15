@@ -115,6 +115,8 @@ namespace game{
                 if(it != Textures.end()){
                     return it->first;
                 }
+
+                return "";
             }
         }
 

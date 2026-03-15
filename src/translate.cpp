@@ -1,7 +1,7 @@
 #include <settings.hpp>
 #include <filesystem>
 #include <utils.hpp>
-#include <SFGUI/Widgets.hpp>
+// #include <SFGUI/Widgets.hpp>
 
 static YAML::Node Translates;
 
@@ -50,135 +50,135 @@ namespace game{
         }
 
         void applyToWidget(sfg::Widget::Ptr widget){
-            std::string widgetType = widget->GetName();
+        //     std::string widgetType = widget->GetName();
 
-            if(!widgetType.compare("Box")){
-                auto w = std::static_pointer_cast<sfg::Box>(widget);
+        //     if(!widgetType.compare("Box")){
+        //         auto w = std::static_pointer_cast<sfg::Box>(widget);
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }else if(!widgetType.compare("Button")){
-                auto w = std::static_pointer_cast<sfg::Button>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }else if(!widgetType.compare("Button")){
+        //         auto w = std::static_pointer_cast<sfg::Button>(widget);
 
-                std::string label(w->GetLabel());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetLabel(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("CheckButton")){
-                auto w = std::static_pointer_cast<sfg::CheckButton>(widget);
+        //         std::string label(w->GetLabel());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetLabel(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("CheckButton")){
+        //         auto w = std::static_pointer_cast<sfg::CheckButton>(widget);
 
-                std::string label(w->GetLabel());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetLabel(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("ComboBox")){
-                auto w = std::static_pointer_cast<sfg::ComboBox>(widget);
+        //         std::string label(w->GetLabel());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetLabel(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("ComboBox")){
+        //         auto w = std::static_pointer_cast<sfg::ComboBox>(widget);
 
-                std::vector<std::string> translatedItems;
-                uint selectedItem = w->GetSelectedItem();
+        //         std::vector<std::string> translatedItems;
+        //         uint selectedItem = w->GetSelectedItem();
 
-                while(w->GetItemCount()){
-                    std::string item = w->GetItem(0);
+        //         while(w->GetItemCount()){
+        //             std::string item = w->GetItem(0);
 
-                    if_translate(item){
-                        item.erase(0,2);
-                        item = t(item);
-                    }
-                    translatedItems.push_back(item);
-                    w->RemoveItem(0);
-                }
+        //             if_translate(item){
+        //                 item.erase(0,2);
+        //                 item = t(item);
+        //             }
+        //             translatedItems.push_back(item);
+        //             w->RemoveItem(0);
+        //         }
 
-                for(auto item: translatedItems) w->AppendItem(game::string::str_to_utf32(item));
-            }else if(!widgetType.compare("Fixed")){
-                auto w = std::static_pointer_cast<sfg::Fixed>(widget);
+        //         for(auto item: translatedItems) w->AppendItem(game::string::str_to_utf32(item));
+        //     }else if(!widgetType.compare("Fixed")){
+        //         auto w = std::static_pointer_cast<sfg::Fixed>(widget);
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }else if(!widgetType.compare("Frame")){
-                auto w = std::static_pointer_cast<sfg::Frame>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }else if(!widgetType.compare("Frame")){
+        //         auto w = std::static_pointer_cast<sfg::Frame>(widget);
 
-                std::string label(w->GetLabel());
+        //         std::string label(w->GetLabel());
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetLabel(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("Label")){
-                auto w = std::static_pointer_cast<sfg::Label>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetLabel(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("Label")){
+        //         auto w = std::static_pointer_cast<sfg::Label>(widget);
 
-                std::string label(w->GetText());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetText(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("Notebook")){
-                auto w = std::static_pointer_cast<sfg::Notebook>(widget);
+        //         std::string label(w->GetText());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetText(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("Notebook")){
+        //         auto w = std::static_pointer_cast<sfg::Notebook>(widget);
 
-                for(int i=0; i<w->GetPageCount(); i++){
-                    applyToWidget(w->GetNthPage(i));
+        //         for(int i=0; i<w->GetPageCount(); i++){
+        //             applyToWidget(w->GetNthPage(i));
 
-                    auto page = std::static_pointer_cast<sfg::Label>(w->GetNthTabLabel(i));
-                    std::string label(page->GetText());
-                    if_translate(label){
-                        label.erase(0, 2);
-                        page->SetText(game::string::str_to_utf32(t(label)));
-                    }
-                }
-            }else if(!widgetType.compare("ProgressBar")){
-                auto w = std::static_pointer_cast<sfg::ProgressBar>(widget);
-            }else if(!widgetType.compare("RadioButton")){
-                auto w = std::static_pointer_cast<sfg::RadioButton>(widget);
+        //             auto page = std::static_pointer_cast<sfg::Label>(w->GetNthTabLabel(i));
+        //             std::string label(page->GetText());
+        //             if_translate(label){
+        //                 label.erase(0, 2);
+        //                 page->SetText(game::string::str_to_utf32(t(label)));
+        //             }
+        //         }
+        //     }else if(!widgetType.compare("ProgressBar")){
+        //         auto w = std::static_pointer_cast<sfg::ProgressBar>(widget);
+        //     }else if(!widgetType.compare("RadioButton")){
+        //         auto w = std::static_pointer_cast<sfg::RadioButton>(widget);
 
-                std::string label(w->GetLabel());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetLabel(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("ScrolledWindow")){
-                auto w = std::static_pointer_cast<sfg::ScrolledWindow>(widget);
+        //         std::string label(w->GetLabel());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetLabel(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("ScrolledWindow")){
+        //         auto w = std::static_pointer_cast<sfg::ScrolledWindow>(widget);
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }else if(!widgetType.compare("Table")){
-                auto w = std::static_pointer_cast<sfg::Table>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }else if(!widgetType.compare("Table")){
+        //         auto w = std::static_pointer_cast<sfg::Table>(widget);
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }else if(!widgetType.compare("ToggleButton")){
-                auto w = std::static_pointer_cast<sfg::ToggleButton>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }else if(!widgetType.compare("ToggleButton")){
+        //         auto w = std::static_pointer_cast<sfg::ToggleButton>(widget);
 
-                std::string label(w->GetLabel());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetLabel(game::string::str_to_utf32(t(label)));
-                }
-            }else if(!widgetType.compare("Viewport")){
-                auto w = std::static_pointer_cast<sfg::Viewport>(widget);
+        //         std::string label(w->GetLabel());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetLabel(game::string::str_to_utf32(t(label)));
+        //         }
+        //     }else if(!widgetType.compare("Viewport")){
+        //         auto w = std::static_pointer_cast<sfg::Viewport>(widget);
 
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }else if(!widgetType.compare("Window")){
-                auto w = std::static_pointer_cast<sfg::Window>(widget);
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }else if(!widgetType.compare("Window")){
+        //         auto w = std::static_pointer_cast<sfg::Window>(widget);
 
-                std::string label(w->GetTitle());
-                if_translate(label){
-                    label.erase(0, 2);
-                    w->SetTitle(game::string::str_to_utf32(t(label)));
-                }
-                for(auto child: w->GetChildren()){
-                    applyToWidget(child);
-                }
-            }
+        //         std::string label(w->GetTitle());
+        //         if_translate(label){
+        //             label.erase(0, 2);
+        //             w->SetTitle(game::string::str_to_utf32(t(label)));
+        //         }
+        //         for(auto child: w->GetChildren()){
+        //             applyToWidget(child);
+        //         }
+        //     }
         }
     }
 }

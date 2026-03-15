@@ -11,5 +11,5 @@ output.mp3
 game.sh
 .vscode
 lib64
-
+.cache
 *.o

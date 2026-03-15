@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(PROJECT_NAME Game)
 set(CMAKE_CXX_FLAGS "-O2 -Wl,-rpath=./lib64 -L./lib64 -rdynamic -g")
 set(PKG_CONFIG_LIBS sfml-all yaml-cpp)
-set(STATIC_LIBS unistring dl)
-set(SHARED_LIBS m box2d SFGUI tinyxml2 XMLLoader)
+set(STATIC_LIBS unistring dl imgui-sfml)
+set(SHARED_LIBS m box2d tinyxml2 XMLLoader GL glfw)
 
 set(SOURCE_FILES
     src/effect.cpp
@@ -21,7 +21,7 @@ set(SOURCE_FILES
     src/translate.cpp
     src/utils.cpp
     src/vars.cpp
-    src/settings/window.cpp
+    src/ui/settings.cpp
 
     # src/Loaders/string.cpp
     # src/Loaders/XMLLoader.cpp
@@ -92,4 +92,5 @@ add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp src/resources/tex
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp -R src/resources/musics/ build/resources/)
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp -R src/resources/sounds/ build/resources/)
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp -R src/resources/gui build/resources/)
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp -R src/resources/stages build/resources/)
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND cp -R lib64 build/)

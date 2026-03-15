@@ -1,0 +1,1083 @@
+Version: 0.1.0
+Comment: Created by Sylph
+settings:
+  WorldWidth: 43
+  WorldHeight: 18
+  TilemapWidth: 32
+  TilemapHeight: 32
+Tilemaps:
+  - ground.png
+Layers:
+  - Name: Ground
+    Type: map
+    Tileds:
+      - TilemapIndex: 0
+        PositionX: 0
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 0
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 0
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 0
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 0
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 0
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 1
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 1
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 1
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 2
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 2
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 2
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 3
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 3
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 3
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 4
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 4
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 4
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 5
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 5
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 5
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 6
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 6
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 6
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 7
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 7
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 7
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 8
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 8
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 8
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 9
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 9
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 9
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 10
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 10
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 10
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 11
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 11
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 11
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 12
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 12
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 12
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 13
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 13
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 13
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 14
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 14
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 14
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 15
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 15
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 15
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 16
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 16
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 16
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 17
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 17
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 17
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 18
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 18
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 18
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 19
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 19
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 19
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 20
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 20
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 20
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 21
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 21
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 21
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 22
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 22
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 22
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 23
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 23
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 23
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 24
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 24
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 24
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 25
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 25
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 25
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 26
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 26
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 26
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 27
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 27
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 27
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 28
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 28
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 28
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 29
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 29
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 29
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 30
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 30
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 30
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 31
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 31
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 31
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 32
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 32
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 32
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 33
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 33
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 33
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 34
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 34
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 34
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 35
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 35
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 35
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 36
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 36
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 36
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 37
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 37
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 37
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 38
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 38
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 38
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 39
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 39
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 39
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 40
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 40
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 40
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 41
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 41
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 41
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 1
+        OffsetY: 2
+      - TilemapIndex: 0
+        PositionX: 42
+        PositionY: 15
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 2
+        OffsetY: 0
+      - TilemapIndex: 0
+        PositionX: 42
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 2
+        OffsetY: 1
+      - TilemapIndex: 0
+        PositionX: 42
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 2
+        OffsetY: 1
+  - Name: Details
+    Type: map
+    Tileds:
+      - TilemapIndex: 0
+        PositionX: 4
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 11
+        OffsetY: 5
+      - TilemapIndex: 0
+        PositionX: 16
+        PositionY: 16
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 11
+        OffsetY: 7
+      - TilemapIndex: 0
+        PositionX: 31
+        PositionY: 17
+        Direction: 0
+        MirrorX: false
+        MirrorY: false
+        OffsetX: 12
+        OffsetY: 6
+  - Name: GroundCollision
+    Type: collision
+    CollisionPoints:
+      - X: 0
+        Y: 15
+      - X: 0
+        Y: 18
+      - X: 43
+        Y: 18
+      - X: 43
+        Y: 15

@@ -1,7 +1,7 @@
 #include <SFML/Graphics.hpp>
-#include <SFGUI/SFGUI.hpp>
-#include <SFGUI/Widgets.hpp>
-#include <XMLLoader/XMLLoader.hpp>
+// #include <SFGUI/SFGUI.hpp>
+// #include <SFGUI/Widgets.hpp>
+// #include <XMLLoader/XMLLoader.hpp>
 
 #include <physic.hpp>
 #include <resource.hpp>
@@ -12,26 +12,31 @@
 #include <splash.hpp>
 #include <game.hpp>
 #include <vars.hpp>
+#include <string>
+#include <ui.hpp>
+
+void createLevel(game::Game::Ptr game);
 
 int main(){
     game::settings::init("settings.cfg");
     game::translate::load();
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
-    // BEGIN_SETTINGS_WINDOW:
-    // { // block to load settings window before game start
-    //     bool endGame = false;
-    //     sf::RenderWindow window(sf::VideoMode({640,480}), "Settings", 0);
-    //     window.setFramerateLimit(60);
-    //     window.resetGLStates();
-    //     window.setPosition(sf::Vector2i({
-    //         ((int)desktop.size.x)/2-320,
-    //         ((int)desktop.size.y)/2-240
-    //     }));
+    BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
+        bool endGame = false;
+        sf::RenderWindow window(sf::VideoMode({640,480}), "Settings", 0);
+        window.setFramerateLimit(24);
+        window.resetGLStates();
+        window.setPosition(sf::Vector2i({
+            ((int)desktop.size.x)/2-320,
+            ((int)desktop.size.y)/2-240
+        }));
 
-    //     if(game::settings::openSettingWindow(window)) return 0;
-    // }
-    // END_SETTINGS_WINDOW:
+        if(game::ui::settingsWindow(window)){
+            return 0;
+        }
+
+    }END_SETTINGS_WINDOW:
 
     game::settings::save("settings.cfg");
 
@@ -45,60 +50,34 @@ int main(){
         game::settings::getProperty<bool>("config.style.window.fullscreen") ? sf::State::Fullscreen : sf::State::Windowed
     );
     sf::View view(window.getView());
-    view.setCenter({WINDOW_WIDTH/2, WINDOW_HEIGHT/2});
+    view.setCenter({WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0});
     view.zoom(((float)WINDOW_WIDTH)/window.getSize().x);
     window.setView(view);
     window.resetGLStates();
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(game::settings::getProperty<bool>("config.game.vsync"));
 
-    // std::thread t = game::resource::loadAll();
-    // game::splash::show(window);
-    // t.join();
-    game::resource::loadAll(window);
+    std::thread t = game::resource::loadAll();
+    game::splash::show(window);
+    t.join();
+    // game::resource::loadAll(window);
 
     game::physic::world::create(sf::Vector2f(0.0, 9.8));
-    auto texture = game::resource::texture::loadFromFile("res", "wolf-run.png");
 
     {
         game::Game::Ptr game = game::Game::create();
-        // game->loadFromSlot(0);
-        auto scene = game->addScene("Primary", game::Scene::create("default"));
-        auto slots = game->getSlots();
-        sf::Texture tex(*slots[slots.size()-1].image);
-        sf::Sprite spr(tex);
-        spr.setPosition({200, 200});
+        // sf::RectangleShape shape({600,WINDOW_HEIGHT*0.75});
+        // shape.setFillColor(sf::Color::Red);
 
-        auto object = scene->createObject("res", "Object", sf::Vector2f(100, 16), sf::Vector2f((16*5)/2, (16*5)/2), b2_dynamicBody);
+        sf::Texture waterMirrorTexture(window.getSize());
+        sf::Sprite waterMirrorSprite(waterMirrorTexture);
 
-        object->addAnimation("idle", sf::IntRect({64*0, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*1, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*2, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*3, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*4, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*5, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*6, 0},{64, 64}));
-        object->addAnimation("idle", sf::IntRect({64*7, 0},{64, 64}));
-        object->setAnimation("idle");
-        object->setDelay(5);
-        object->sprite().scale({15, 15});
+        waterMirrorSprite.setScale(sf::Vector2f(1, -0.5));
+        waterMirrorSprite.setTextureRect(sf::IntRect(sf::Vector2i(0,WINDOW_HEIGHT*.25), sf::Vector2i(WINDOW_WIDTH, WINDOW_HEIGHT*.50)));
+        waterMirrorSprite.setPosition(sf::Vector2f(0, WINDOW_HEIGHT));
+        waterMirrorSprite.setColor(sf::Color(0xffffff50));
 
-        game::physic::body::setRestitution("default", object, 0.0);
-
-        auto windowSize = window.getSize();
-        auto ground = scene->createObject("", "Ground", sf::Vector2f(320, windowSize.y/2), sf::Vector2f(300, 16));
-
-        sf::Texture texture(windowSize);
-        windowSize.y /= 2;
-        sf::Sprite sprite(texture, sf::IntRect({0,0}, {windowSize.x, windowSize.y}));
-        sprite.setScale({1, -1});
-        sprite.setPosition({0, window.getSize().y});
-
-        game::vars::set<std::string>("First", "Value");
-        game::vars::set<long>("Number", 231);
-        game::vars::set<double>("Decimal", 12.6);
-        game::vars::set<bool>("Logic", true);
-
+        createLevel(game);
 
         while(window.isOpen()){
             while(const auto event = window.pollEvent()){
@@ -108,22 +87,17 @@ int main(){
 
                 if(event->is<sf::Event::KeyPressed>()){
                     auto keypressed = event->getIf<sf::Event::KeyPressed>();
-                    if(keypressed->code == sf::Keyboard::Key::F12){
-                        // game->createSlots();
-                        game->saveToSlot(window);
-                    }
                 }
             }
 
             game->update();
 
-            window.clear(sf::Color(0xff));
-            window.draw(spr);
+            window.clear(sf::Color(0x123456ff));
 
             game->draw(window);
+            waterMirrorTexture.update(window);
+            window.draw(waterMirrorSprite);
 
-            // texture.update(window);
-            // window.draw(sprite);
             window.display();
         }
     }
@@ -132,4 +106,27 @@ int main(){
     game::resource::unloadAll();
 
     return 0;
+}
+
+void createLevel(game::Game::Ptr game){
+    game::Scene::Ptr scene = game->addScene("GameScene", game::Scene::create("default"));
+    scene->setShowPhysic(true);
+    auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
+    collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
+    for(int i=0; i<3;i++){
+        for(int j=0; j<43; j++){
+            sf::Vector2f position;
+            position.x = j*32+16;
+            position.y = ((15*32)+(i*32))+16;
+            auto object = scene->createObject("ground", std::string(std::to_string(j)+"-"+std::to_string(i)), position, sf::Vector2f(16,16));
+
+            if(j == 0){
+                object->sprite().setTextureRect(sf::IntRect({0,(i==2 ? 1: i)*32}, {32,32}));
+            }else if(j == 42){
+                object->sprite().setTextureRect(sf::IntRect({32*2,(i==2 ? 1: i)*32}, {32,32}));
+            }else{
+                object->sprite().setTextureRect(sf::IntRect({32,(i==2 ? 1: i)*32}, {32,32}));
+            }
+        }
+    }
 }
