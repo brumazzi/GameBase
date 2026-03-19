@@ -8,7 +8,6 @@
 #include <iostream>
 #include <string>
 
-#include <SFGUI/Widget.hpp>
 
 #define PROJECT_NAME "CozyGame"
 #define WINDOW_WIDTH 1368
@@ -32,7 +31,6 @@ namespace game{
         void load();
         void setLang(std::string lang);
         std::string get(std::string path);
-        void applyToWidget(sfg::Widget::Ptr widget);
     }
 }
 #define SETTINGS ::game::settings::getSettings()

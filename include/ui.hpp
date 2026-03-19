@@ -62,6 +62,7 @@ namespace game {
         // void freeWindow(std::string name);
         // void clearWindows();
 
+        ImFont* loadConfigFont(ImGuiIO& io);
         int settingsWindow(sf::RenderWindow& render);
     }  // namespace ui
 }  // namespace game

@@ -1,4 +1,4 @@
-en:
+en-US:
     title:
         menu:
             buttons:
@@ -9,8 +9,12 @@ en:
     setting:
         window:
             title: Settings
-            resolution: Resolution
-            fullscreen: FullScreen
+            checkbox:
+                fullscreen: FullScreen
+                vsync: V-Sync
+            label:
+                resolution: Resolution
+                language: Language
             tab:
                 general: General
                 audio: Audio

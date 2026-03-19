@@ -13,3 +13,5 @@ game.sh
 lib64
 .cache
 *.o
+compile_commands.json
+grass-15-tiles.png

@@ -1,7 +1,6 @@
 #include <settings.hpp>
 #include <filesystem>
 #include <utils.hpp>
-// #include <SFGUI/Widgets.hpp>
 
 static YAML::Node Translates;
 
@@ -49,7 +48,7 @@ namespace game{
             ::game::settings::getSettings()["config"]["lang"] = lang;
         }
 
-        void applyToWidget(sfg::Widget::Ptr widget){
+        // void applyToWidget(sfg::Widget::Ptr widget){
         //     std::string widgetType = widget->GetName();
 
         //     if(!widgetType.compare("Box")){
@@ -179,6 +178,6 @@ namespace game{
         //             applyToWidget(child);
         //         }
         //     }
-        }
+        // }
     }
 }

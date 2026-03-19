@@ -1,7 +1,4 @@
 #include <SFML/Graphics.hpp>
-// #include <SFGUI/SFGUI.hpp>
-// #include <SFGUI/Widgets.hpp>
-// #include <XMLLoader/XMLLoader.hpp>
 
 #include <physic.hpp>
 #include <resource.hpp>
@@ -14,6 +11,7 @@
 #include <vars.hpp>
 #include <string>
 #include <ui.hpp>
+#include "utils.hpp"
 
 void createLevel(game::Game::Ptr game);
 
@@ -23,8 +21,7 @@ int main(){
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
     BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
-        bool endGame = false;
-        sf::RenderWindow window(sf::VideoMode({640,480}), "Settings", 0);
+        sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
         window.setFramerateLimit(24);
         window.resetGLStates();
         window.setPosition(sf::Vector2i({
@@ -57,10 +54,10 @@ int main(){
     window.setFramerateLimit(60);
     window.setVerticalSyncEnabled(game::settings::getProperty<bool>("config.game.vsync"));
 
-    std::thread t = game::resource::loadAll();
-    game::splash::show(window);
-    t.join();
-    // game::resource::loadAll(window);
+    // std::thread t = game::resource::loadAll();
+    // game::splash::show(window);
+    // t.join();
+    game::resource::loadAll(window);
 
     game::physic::world::create(sf::Vector2f(0.0, 9.8));
 

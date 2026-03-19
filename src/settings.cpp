@@ -3,8 +3,6 @@
 #include <buttons.hpp>
 #include <utils.hpp>
 
-#include <SFGUI/SFGUI.hpp>
-
 #include <fstream>
 
 #ifdef _WIN32
@@ -58,7 +56,7 @@ namespace game{
                 game::joystick::buttons::LEFT           = (uint32_t) set["config"]["input"]["joystick"]["LEFT"].as<int>();
                 game::joystick::buttons::RIGHT          = (uint32_t) set["config"]["input"]["joystick"]["RIGHT"].as<int>();
             }else{
-                set["config"]["lang"]                           = "en";
+                set["config"]["lang"]                           = "en-US";
                 set["config"]["style"]["font"]                  = "./resources/fonts/Courier Prime Bold.ttf";
                 set["config"]["style"]["window"]["width"]       = WINDOW_WIDTH;
                 set["config"]["style"]["window"]["height"]      = WINDOW_HEIGHT;

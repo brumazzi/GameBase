@@ -1,0 +1,24 @@
+pt-BR:
+    title:
+        menu:
+            buttons:
+                new_game: Novo Jogo
+                load_game: Carregar Jogo
+                credits: Créditos
+                exit: Sair
+    setting:
+        window:
+            title: Configurações
+            checkbox:
+                fullscreen: Tela Cheia
+                vsync: V-Sync
+            label:
+                resolution: Resolução
+                language: Idioma
+            tab:
+                general: Geral
+                audio: Áudio
+                video: Vídeo
+            button:
+                quit: Sair
+                play: Jogar
