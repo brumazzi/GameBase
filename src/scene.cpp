@@ -1,11 +1,19 @@
+#include <box2d/types.h>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/View.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <scene.hpp>
 #include <resource.hpp>
+#include <utility>
+#include "physic.hpp"
 
 namespace game {
     Scene::Ptr Scene::create(std::string world){ return std::make_shared<game::Scene>(world); }
 
     Scene::Scene(std::string world){
         this->m_world = world;
+        this->m_grid = sf::Vector2u{32,32};
     }
     Scene::~Scene(){
         this->m_objects.clear();
@@ -30,9 +38,31 @@ namespace game {
         }
     }
     void Scene::draw(sf::RenderWindow& render){
-        for(auto it: this->m_objects){
-            if(it.second->isDestroyed() || !it.second->isDrawable()) continue;
-            render.draw(*it.second);
+        sf::FloatRect viewport(render.getView().getViewport());
+
+        viewport.size.x = (int)(viewport.size.x*render.getSize().x/this->m_grid.x);
+        viewport.size.y = (int)(viewport.size.y*render.getSize().y/this->m_grid.y);
+        viewport.position.x = (int)(viewport.position.x/this->m_grid.x);
+        viewport.position.y = (int)(viewport.position.y/this->m_grid.y);
+
+        for(int i=0; i<game::scene::Layer::LEVEL_COUNT; i++){
+            for(auto itX: this->m_layers[(scene::Layer)i]){
+                if(itX.first >= (viewport.position.x-2) && itX.first <= (viewport.size.x+2)){
+                    for(auto itY: itX.second){
+                        if(itY.first >= (viewport.position.y) && itY.first <= (viewport.size.y)){
+                            sf::Sprite* sprite = itY.second;
+                            render.draw(*sprite);
+                        }
+                    }
+                }
+            }
+
+            if(i == game::scene::Layer::OBJECT_FIELD){
+                for(auto it: this->m_objects){
+                    if(it.second->isDestroyed() || !it.second->isDrawable()) continue;
+                    render.draw(*it.second);
+                }
+            }
         }
         if(this->m_showPhysic) game::physic::world::drawLines(render, this->m_world);
     }
@@ -43,11 +73,13 @@ namespace game {
     void Scene::setWorld(std::string world){ this->m_world = world; }
     void Scene::setShowPhysic(bool flag){ this->m_showPhysic = flag; }
     void Scene::setName(std::string name){ this->m_name = name; }
+    void Scene::setGrid(sf::Vector2u grid){ this->m_grid = grid; }
     std::string Scene::getWorld(){ return this->m_world; }
     bool Scene::getShowPhysic(){ return this->m_showPhysic; }
     std::string Scene::getName(){ return this->m_name; }
+    sf::Vector2u Scene::getGrid(){ return this->m_grid; }
 
-    const std::map<std::string, game::Object::Ptr> Scene::objects(){
+    const std::unordered_map<std::string, game::Object::Ptr> Scene::objects(){
         return this->m_objects;
     }
     void Scene::objectList(std::vector<std::string>& list){
@@ -80,6 +112,19 @@ namespace game {
         newObject->setSize(size);
 
         return newObject;
+    }
+    void Scene::addSprite(game::scene::Layer layerID, std::string texture, sf::IntRect rect, sf::Vector2f pos){
+        sf::Sprite* sprite = new sf::Sprite(*game::resource::texture::get(texture));
+        sprite->setTextureRect(rect);
+        sprite->setPosition({pos.x*this->m_grid.x, pos.y*this->m_grid.y});
+        this->m_layers[layerID][pos.x][pos.y] = sprite;
+    }
+    void Scene::addCollisionArea(std::string name, sf::FloatRect rect){
+        rect.position.x = rect.position.x*this->m_grid.x + (rect.size.x/2.0);
+        rect.position.y = rect.position.y*this->m_grid.y + (rect.size.y/2.0);
+        rect.size.x = rect.size.x/2;
+        rect.size.y = rect.size.y/2;
+        game::physic::body::create(this->m_world, name, nullptr, rect.position, rect.size);
     }
 
     void Scene::removeObject(std::string object){

@@ -137,7 +137,7 @@ namespace game{
                     bodyMap[world][bodyName].def.fixedRotation = fixRotation;
 
                     bodyMap[world][bodyName].id = b2CreateBody(worldMap[world].id, &bodyMap[world][bodyName].def);
-                    b2Body_SetUserData(bodyMap[world][bodyName].id, static_cast<void*>(object.get()));
+                    if(object) b2Body_SetUserData(bodyMap[world][bodyName].id, static_cast<void*>(object.get()));
 
                     b2Polygon box = b2MakeBox(size.x, size.y);
                     b2ShapeDef shapeDef = b2DefaultShapeDef();

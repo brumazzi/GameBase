@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(PROJECT_NAME Game)
 set(CMAKE_CXX_FLAGS "-O2 -Wl,-rpath=./lib64 -L./lib64 -rdynamic -g")
 set(PKG_CONFIG_LIBS sfml-all yaml-cpp)
-set(STATIC_LIBS unistring dl imgui-sfml)
-set(SHARED_LIBS m box2d tinyxml2 GL glfw)
+set(STATIC_LIBS unistring dl imgui-sfml box2d m)
+set(SHARED_LIBS tinyxml2 GL glfw)
 
 set(SOURCE_FILES
     src/effect.cpp

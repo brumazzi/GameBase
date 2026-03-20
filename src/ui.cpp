@@ -11,7 +11,7 @@
 #include <utils.hpp>
 #include <algorithm>
 #include <settings.hpp>
-#include "imgui-SFML.h"
+#include <imgui-SFML.h>
 
 using namespace ImGui;
 
@@ -28,7 +28,9 @@ namespace game {
                 return nullptr;
             }
             io.Fonts->Build();
-            SFML::UpdateFontTexture();
+            if(!SFML::UpdateFontTexture()){
+                return nullptr;
+            }
 
             io.FontDefault = font;
             unsigned char* pixels;
