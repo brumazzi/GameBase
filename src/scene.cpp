@@ -6,6 +6,7 @@
 #include <scene.hpp>
 #include <resource.hpp>
 #include <utility>
+#include <vector>
 #include "physic.hpp"
 
 namespace game {
@@ -17,6 +18,15 @@ namespace game {
     }
     Scene::~Scene(){
         this->m_objects.clear();
+        for(auto it: this->m_layers){
+            for(auto it2: it.second){
+                for(auto it3: it2.second){
+                    delete it3.second;
+                }
+            }
+        }
+        this->m_layers.clear();
+        this->m_collisionArea.clear();
     }
 
     void Scene::update(){
@@ -73,7 +83,37 @@ namespace game {
     void Scene::setWorld(std::string world){ this->m_world = world; }
     void Scene::setShowPhysic(bool flag){ this->m_showPhysic = flag; }
     void Scene::setName(std::string name){ this->m_name = name; }
-    void Scene::setGrid(sf::Vector2u grid){ this->m_grid = grid; }
+    void Scene::setGrid(sf::Vector2u grid){
+        for(auto [layer, data]: this->m_layers){
+            for(auto [x, data2]: data){
+                for(auto [y, sprite]: data2){
+                    sf::IntRect newRect(sprite->getTextureRect());
+                    newRect.position.x = newRect.position.x/this->m_grid.x*grid.x;
+                    newRect.position.y = newRect.position.y/this->m_grid.y*grid.y;
+                    newRect.size.x = grid.x;
+                    newRect.size.y = grid.y;
+                    sprite->setTextureRect(newRect);
+
+                    sf::Vector2f newPos;
+                    newPos.x = x*grid.x;
+                    newPos.y = y*grid.y;
+                    sprite->setPosition(newPos);
+                }
+            }
+        }
+        // std::vector<std::string> mapKeys(this->m_collisionArea.size());
+        // for(auto [key, _]: this->m_collisionArea){
+        //     mapKeys.push_back(key);
+        // }
+        // for(auto collision: mapKeys){
+        //     sf::FloatRect rect(this->m_collisionArea[collision]);
+        //     if(game::physic::body::exists(this->m_world, collision)){
+        //         this->removeCollisionArea(collision);
+        //         // this->addCollisionArea(collision, rect);
+        //     }
+        // }
+        this->m_grid = grid;
+    }
     std::string Scene::getWorld(){ return this->m_world; }
     bool Scene::getShowPhysic(){ return this->m_showPhysic; }
     std::string Scene::getName(){ return this->m_name; }
@@ -119,12 +159,29 @@ namespace game {
         sprite->setPosition({pos.x*this->m_grid.x, pos.y*this->m_grid.y});
         this->m_layers[layerID][pos.x][pos.y] = sprite;
     }
+    void Scene::removeSprite(game::scene::Layer layerID, sf::Vector2f pos){
+        this->m_layers[layerID][pos.x].erase(pos.y);
+    }
     void Scene::addCollisionArea(std::string name, sf::FloatRect rect){
+        if(this->m_collisionArea.contains(name)) return;
+
         rect.position.x = rect.position.x*this->m_grid.x + (rect.size.x/2.0);
         rect.position.y = rect.position.y*this->m_grid.y + (rect.size.y/2.0);
         rect.size.x = rect.size.x/2;
         rect.size.y = rect.size.y/2;
+
+        this->m_collisionArea.emplace(name, rect);
         game::physic::body::create(this->m_world, name, nullptr, rect.position, rect.size);
+    }
+    void Scene::updateCollisionArea(std::string name, sf::FloatRect rect){
+        this->removeCollisionArea(name);
+        this->addCollisionArea(name, rect);
+    }
+    void Scene::removeCollisionArea(std::string name){
+        if(!this->m_collisionArea.contains(name)) return;
+
+        this->m_collisionArea.erase(name);
+        game::physic::body::destroy(this->m_world, name);
     }
 
     void Scene::removeObject(std::string object){

@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 
+#include <SFML/Window/Keyboard.hpp>
 #include <physic.hpp>
 #include <resource.hpp>
 #include <object.hpp>
@@ -20,22 +21,22 @@ int main(){
     game::translate::load();
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
-    BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
-        sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
-        window.setFramerateLimit(24);
-        window.resetGLStates();
-        window.setPosition(sf::Vector2i({
-            ((int)desktop.size.x)/2-320,
-            ((int)desktop.size.y)/2-240
-        }));
+    // BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
+    //     sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
+    //     window.setFramerateLimit(24);
+    //     window.resetGLStates();
+    //     window.setPosition(sf::Vector2i({
+    //         ((int)desktop.size.x)/2-320,
+    //         ((int)desktop.size.y)/2-240
+    //     }));
 
-        if(game::ui::settingsWindow(window)){
-            return 0;
-        }
+    //     if(game::ui::settingsWindow(window)){
+    //         return 0;
+    //     }
 
-    }END_SETTINGS_WINDOW:
+    // }END_SETTINGS_WINDOW:
 
-    game::settings::save("settings.cfg");
+    // game::settings::save("settings.cfg");
 
     sf::RenderWindow window(
         sf::VideoMode({
@@ -83,7 +84,18 @@ int main(){
                 }
 
                 if(event->is<sf::Event::KeyPressed>()){
-                    auto keypressed = event->getIf<sf::Event::KeyPressed>();
+                    auto keyPressed = event->getIf<sf::Event::KeyPressed>();
+                    if(keyPressed->code == sf::Keyboard::Key::A){
+                        game->getScene("GameScene")->setGrid({16,16});
+                        game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{16,16}});
+                        game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{16*41,16*3}});
+                    }else if(keyPressed->code == sf::Keyboard::Key::S){
+                        game->getScene("GameScene")->setGrid({32,32});
+                        // game->getScene("GameScene")->removeCollisionArea("Platform");
+                        game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{32,32}});
+                        game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{32*41,32*3}});
+                    }else if(keyPressed->code == sf::Keyboard::Key::V){
+                    }
                 }
             }
 
@@ -108,8 +120,8 @@ int main(){
 void createLevel(game::Game::Ptr game){
     game::Scene::Ptr scene = game->addScene("GameScene", game::Scene::create("default"));
     scene->setShowPhysic(true);
-    auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
-    collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
+    // auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
+    // collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
 
     // auto object = scene->createObject("ground", "Ground", {1368/2, 17*32}, sf::Vector2f(684.0,32*1.5));
     scene->addCollisionArea("Platform", {{0,1},{32,32}});
