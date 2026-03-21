@@ -1,8 +1,8 @@
+#include <unordered_map>
 #include <vars.hpp>
-#include <map>
 #include <any>
 
-std::map<std::string, std::any> VAR_NODE;
+std::unordered_map<std::string, std::any> VAR_NODE;
 
 namespace game{
     namespace vars{

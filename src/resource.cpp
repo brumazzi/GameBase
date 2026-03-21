@@ -1,3 +1,6 @@
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <resource.hpp>
 #include <settings.hpp>
 #include <filesystem>

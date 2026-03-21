@@ -101,17 +101,6 @@ namespace game {
                 }
             }
         }
-        // std::vector<std::string> mapKeys(this->m_collisionArea.size());
-        // for(auto [key, _]: this->m_collisionArea){
-        //     mapKeys.push_back(key);
-        // }
-        // for(auto collision: mapKeys){
-        //     sf::FloatRect rect(this->m_collisionArea[collision]);
-        //     if(game::physic::body::exists(this->m_world, collision)){
-        //         this->removeCollisionArea(collision);
-        //         // this->addCollisionArea(collision, rect);
-        //     }
-        // }
         this->m_grid = grid;
     }
     std::string Scene::getWorld(){ return this->m_world; }

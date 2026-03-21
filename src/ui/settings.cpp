@@ -5,7 +5,7 @@
 #include <ui.hpp>
 #include <imgui-SFML.h>
 #include "imgui/imgui.h"
-#include "utils.hpp"
+#include <utils.hpp>
 #include <iostream>
 #include <settings.hpp>
 
@@ -92,7 +92,7 @@ namespace game{
                             Text("%s", t("setting.window.label.language").c_str());
                             if(Combo("##Settings/Language", &currentLang, langs, 2)){
                                 // Here the code update language and window title in real-time
-                                game::settings::setProperty<std::string>("config.lang", std::string(langs[currentLang]));
+                                game::translate::setLang(std::string(langs[currentLang]));
                                 render.setTitle(game::string::str_to_utf32(t("setting.window.title")));
                             }
                             EndTabItem();
