@@ -1,6 +1,14 @@
 #include <SFML/Graphics.hpp>
 
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/Shader.hpp>
+#include <SFML/Graphics/Shape.hpp>
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <physic.hpp>
 #include <resource.hpp>
 #include <object.hpp>
@@ -15,7 +23,8 @@
 #include <utils.hpp>
 #include <settings.hpp>
 #include <vars.hpp>
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
+#include <imgui-SFML.h>
 
 void createLevel(game::Game::Ptr game);
 
@@ -24,22 +33,25 @@ int main(){
     game::translate::load();
     sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
-    BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
-        sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
-        window.setFramerateLimit(24);
-        window.resetGLStates();
-        window.setPosition(sf::Vector2i({
-            ((int)desktop.size.x)/2-320,
-            ((int)desktop.size.y)/2-240
-        }));
+    // BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
+    //     sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
+    //     window.setFramerateLimit(24);
+    //     window.resetGLStates();
+    //     window.setPosition(sf::Vector2i({
+    //         ((int)desktop.size.x)/2-320,
+    //         ((int)desktop.size.y)/2-240
+    //     }));
 
-        if(game::ui::settingsWindow(window)){
-            return 0;
-        }
+    //     if(game::ui::settingsWindow(window)){
+    //         return 0;
+    //     }
 
-    }END_SETTINGS_WINDOW:
+    // }END_SETTINGS_WINDOW:
 
     game::settings::save("settings.cfg");
+
+    game::vars::set("system.sfml.shader.active", sf::Shader::isAvailable());
+    game::vars::set("system.sfml.shader_geometry.active", sf::Shader::isGeometryAvailable());
 
     sf::RenderWindow window(
         sf::VideoMode({
@@ -52,11 +64,6 @@ int main(){
     );
     window.setFramerateLimit(60);
 
-    // std::thread t = game::resource::loadAll();
-    // game::splash::show(window);
-    // t.join();
-    game::resource::loadAll(window);
-
     sf::View view(window.getView());
     view.setCenter({WINDOW_WIDTH/2.0, WINDOW_HEIGHT/2.0});
     view.zoom(((float)WINDOW_WIDTH)/window.getSize().x);
@@ -64,16 +71,22 @@ int main(){
     window.resetGLStates();
     window.setVerticalSyncEnabled(game::settings::getProperty<bool>("config.game.vsync"));
 
-    game::vars::set<long>("system.imgui.active", ImGui::SFML::Init(window));
-    if(game::vars::get<long>("system.imgui.active")){
-        ImGuiIO& io = ImGui::GetIO();
-        auto font = game::ui::loadConfigFont(io);
-        if(font) PushFont(font);
-    }
-
-    game::physic::world::create(sf::Vector2f(0.0, 9.8));
+    // Here can load assets in background or show loaded assets
+    // std::thread t = game::resource::loadAll();
+    // game::splash::show(window);
+    // t.join();
+    game::resource::loadAll(window);
 
     {
+        game::physic::world::create(sf::Vector2f(0.0, 9.8));
+        game::vars::set<long>("system.imgui.active", ImGui::SFML::Init(window));
+
+        if(game::vars::get<long>("system.imgui.active")){
+            ImGuiIO& io = ImGui::GetIO();
+            auto font = game::ui::loadConfigFont(io);
+            if(font) PushFont(font);
+        }
+
         game::Game::Ptr game = game::Game::create();
         // sf::RectangleShape shape({600,WINDOW_HEIGHT*0.75});
         // shape.setFillColor(sf::Color::Red);
@@ -88,8 +101,30 @@ int main(){
 
         createLevel(game);
 
+        sf::Clock deltaClock;
+        sf::Clock clock;
+
+        sf::Shader* shader = game::resource::shader::get("test");
+        // shader.loadFromFile("clouds.frag", sf::Shader::Type::Fragment);
+        // shader.loadFromFile("simple.frag", sf::Shader::Type::Fragment);
+        sf::RenderStates states;
+        states.shader = shader;
+
+        sf::RectangleShape shape;
+        shape.setFillColor(sf::Color(0x1066Ac));
+        shape.setSize({1366,768});
+        shape.setPosition({0,0});
+        sf::Sprite sprite(*game::resource::texture::get("agua"));
+        sprite.setPosition({60,60});
+
+        sf::Vector2f texSize(game::resource::texture::get("rose")->getSize());
+
         while(window.isOpen()){
             while(const auto event = window.pollEvent()){
+                if(game::vars::get<long>("system.imgui.active")){
+                    ImGui::SFML::ProcessEvent(window, *event);
+                }
+
                 if(event->is<sf::Event::Closed>()){
                     window.close();
                 }
@@ -111,18 +146,41 @@ int main(){
                 }
             }
 
+            if(game::vars::get<long>("system.imgui.active")){
+                ImGuiIO& io = ImGui::GetIO();
+                if (io.WantCaptureMouse){
+                    // ImGui está usando o mouse (ex.: hover em janela) - ignore na sua app
+                    // (Sua lógica de mouse da app aqui, se não capturado)
+                }
+
+                ImGui::SFML::Update(window, deltaClock.restart());
+            }
             game->update();
 
             window.clear(sf::Color(0x123456ff));
 
+            float elapsed = clock.getElapsedTime().asSeconds();
+
+            // Passa uniforms
+            shader->setUniform("u_time", elapsed);
+            shader->setUniform("u_mouse", sf::Vector2f(sf::Mouse::getPosition(window)));
+            shader->setUniform("u_resolution", sf::Vector2f(window.getSize()));
+
             game->draw(window);
+            window.draw(shape, states);
+            // std::cout << sf::Mouse::getPosition(window).x << ' ' << sf::Mouse::getPosition(window).y << std::endl;
+            if (elapsed >= std::numbers::pi) clock.restart();
+
+
             // waterMirrorTexture.update(window);
             // window.draw(waterMirrorSprite);
+            if(game::vars::get<long>("system.imgui.active")) ImGui::SFML::Render(window);
+
 
             window.display();
         }
+        if((game::vars::get<long>("system.imgui.active"))) PopFont();
     }
-    if((game::vars::get<long>("system.imgui.active"))) PopFont();
 
     ImGui::SFML::Shutdown();
     game::physic::world::destroy();

@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include <iostream>
 #include <thread>
 #include <map>
@@ -54,8 +55,16 @@ namespace game{
             std::string mask(sf::Texture* texture);
         }
 
+        namespace shader{
+            sf::Shader* loadFromFile(std::string mask, std::vector<std::pair<std::string,std::string>> pathsPair);
+            void remove(std::string mask);
+            sf::Shader* get(std::string mask);
+            std::string mask(sf::Shader* shader);
+        }
+
         std::thread loadAll();
         void loadAll(sf::RenderWindow &render);
+        std::string getError();
         void unloadAll();
     }
 }

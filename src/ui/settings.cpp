@@ -1,6 +1,8 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/System/Time.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <string>
 #include <ui.hpp>
 #include <imgui-SFML.h>
@@ -63,11 +65,19 @@ namespace game{
             if(font) PushFont(font);
 
             while (render.isOpen()) {
+                bool btnQuit = false;
+                bool btnPlay = false;
                 while (auto event = render.pollEvent()) {
                     ImGui::SFML::ProcessEvent(render, *event);
 
                     if (event->is<sf::Event::Closed>()) {
                         render.close();
+                    }else if(event->is<sf::Event::KeyPressed>()){
+                        auto keyPressed = event->getIf<sf::Event::KeyPressed>();
+                        if(keyPressed->code == sf::Keyboard::Key::Enter && keyPressed->alt) {
+                            status = 0;
+                            render.close();
+                        }
                     }
                 }
 
@@ -80,9 +90,6 @@ namespace game{
 
                 render.clear(sf::Color(0xccccccff));
 
-                bool btnQuit = false;
-                bool btnPlay = false;
-
                 auto size = render.getSize();
                 if(Begin("##Settings", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove)){
                     SetWindowSize({(float)size.x-2.0f, (float)size.y*0.9f-1.f});
@@ -91,7 +98,7 @@ namespace game{
                         if(BeginTabItem(std::string(t("setting.window.tab.general")+"##Settings/General").c_str())){
                             Text("%s", t("setting.window.label.language").c_str());
                             if(Combo("##Settings/Language", &currentLang, langs, 2)){
-                                // Here the code update language and window title in real-time
+                                // This code update language and window title in real-time
                                 game::translate::setLang(std::string(langs[currentLang]));
                                 render.setTitle(game::string::str_to_utf32(t("setting.window.title")));
                             }

@@ -1,13 +1,25 @@
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Shader.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <vars.hpp>
 #include <resource.hpp>
 #include <settings.hpp>
 #include <filesystem>
+#include <thread>
+#include <vector>
+#include "utils.hpp"
 
-std::map<std::string, game::resource::Audio*> Musics;
-std::map<std::string, game::resource::Audio*> Sounds;
-std::map<std::string, sf::Texture*> Textures;
+std::unordered_map<std::string, game::resource::Audio*> Musics;
+std::unordered_map<std::string, game::resource::Audio*> Sounds;
+std::unordered_map<std::string, sf::Texture*> Textures;
+std::unordered_map<std::string, sf::Font*> Fonts;
+std::unordered_map<std::string, sf::Shader*> Shaders;
+
+static bool ALL_LOADED = false;
+std::string RESSOURCE_ERROR;
 
 namespace game{
     namespace resource{
@@ -123,80 +135,136 @@ namespace game{
             }
         }
 
+        namespace shader{
+            sf::Shader* loadFromFile(std::string mask, std::vector<std::pair<std::string,std::string>> pathsPair){
+                sf::Shader* shader = new sf::Shader();
+
+                for(auto [path, ext]: pathsPair){
+                    std::string fullPath(path);
+                    fullPath.append(ext);
+                    if(!ext.compare(".vert")){
+                        if(!shader->loadFromFile(path, sf::Shader::Type::Vertex)){
+                            delete shader;
+                            return nullptr;
+                        }
+                    }else if(!ext.compare(".frag")){
+                        if(!shader->loadFromFile(path, sf::Shader::Type::Fragment)){
+                            delete shader;
+                            return nullptr;
+                        }
+                    }else if(!ext.compare(".geom") && game::vars::get<bool>("system.sfml.shader_geometry.active")){
+                        if(!shader->loadFromFile(path, sf::Shader::Type::Geometry)){
+                            delete shader;
+                            return nullptr;
+                        }
+                    }
+                }
+                Shaders[mask] = shader;
+                return shader;
+            }
+            void remove(std::string mask){
+                if(!Shaders.contains(mask)) return;
+
+                delete Shaders[mask];
+                Shaders.erase(mask);
+            }
+            sf::Shader* get(std::string mask){
+                if(!Shaders.contains(mask)) return nullptr;
+
+                return Shaders[mask];
+            }
+            std::string mask(sf::Shader* shader){
+                auto it = std::find_if(Shaders.begin(), Shaders.end(), [&shader](const auto& pair){
+                    return shader == pair.second;
+                });
+
+                if(it != Shaders.end()){
+                    return it->first;
+                }
+
+                return "";
+            }
+        }
+
         static void loadCallback(sf::RenderWindow *render){
+            // TODO: Generate hash for resources to validate
+            std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> groupedShaders;
+
             for(auto path: game::settings::getPropertyNode("config.paths.resources")){
                 for(auto iter: std::filesystem::directory_iterator(path.as<std::string>())){
                     auto ext = iter.path().filename().extension();
+                    std::string fileName = iter.path().filename().string();
+                    void* loadedFile = nullptr;
+
+                    int dotPosition = fileName.find(".");
+                    fileName.erase(fileName.begin()+dotPosition, fileName.end());
+
+
                     if(!ext.compare(".mp3") || !ext.compare(".wav")){
                         auto type = iter.path().filename().generic_string().starts_with("bg") ? \
                                     game::resource::Audio::Type::MUSIC : game::resource::Audio::Type::SOUND;
 
-                        auto fileName = iter.path().filename().string();
-                        fileName.erase(fileName.end()-4, fileName.end());
-                        Audio* loadedFile = audio::loadFromFile(fileName, iter.path().string(), type);
-
-                        if(render){
-                            render->clear();
-
-                            sf::Font font;
-                            if(!font.openFromFile(game::settings::getProperty<std::string>("config.style.font"))){
-                                render->close();
-                                return;
-                            }
-                            sf::Text msg(font, "Loading: " + iter.path().generic_string(), 16);
-                            msg.setPosition(sf::Vector2f(10, render->getSize().y - 26));
-                            if(!loadedFile){
-                                msg.setString("Error to load file: " + iter.path().generic_string());
-                                msg.setFillColor(sf::Color::Red);
-                                render->draw(msg);
-                                render->display();
-                                sf::sleep(sf::seconds(2));
-                                render->close();
-                                return;
-                            }else{
-                                render->draw(msg);
-                            }
-                        }
+                        loadedFile = audio::loadFromFile(fileName, iter.path().string(), type);
                     }else if(!ext.compare(".png") || !ext.compare(".jpg") || !ext.compare(".bmp")){
-                        auto fileName = iter.path().filename().string();
-                        fileName.erase(fileName.end()-4, fileName.end());
-                        sf::Texture* loadedFile = texture::loadFromFile(fileName, iter.path().string());
+                        loadedFile = texture::loadFromFile(fileName, iter.path().string());
+                    }else if(!ext.compare(".frag") || !ext.compare(".vert") || !ext.compare(".geom")){
+                        std::vector<std::string> divisor;
+                        game::string::split(fileName, divisor, ':');
 
-                        if(render){
-                            render->clear();
+                        groupedShaders[divisor[0]].push_back({iter.path().string(), ext.string()});
+                        continue;;
+                    }
 
-                            sf::Font font;
-                            if(!font.openFromFile(game::settings::getProperty<std::string>("config.style.font"))){
-                                render->close();
-                                return;
-                            }
-                            sf::Text msg(font, "Loading: " + iter.path().generic_string(), 16);
-                            msg.setPosition(sf::Vector2f(10, render->getSize().y - 26));
-                            if(!loadedFile){
-                                msg.setString("Error to load file: " + iter.path().generic_string());
-                                msg.setFillColor(sf::Color::Red);
-                                render->draw(msg);
-                                render->display();
-                                sf::sleep(sf::seconds(2));
-                                render->close();
-                                return;
-                            }else{
-                                render->draw(msg);
-                            }
+                    if(render){
+                        render->clear();
+
+                        sf::Font font;
+                        if(!font.openFromFile(game::settings::getProperty<std::string>("config.style.font"))){
+                            render->close();
+                            return;
                         }
+                        sf::Text msg(font, "Loading: " + iter.path().generic_string(), 16);
+                        msg.setPosition(sf::Vector2f(10, WINDOW_HEIGHT - 26));
+                        if(!loadedFile){
+                            msg.setString("Error to load file: " + iter.path().generic_string());
+                            msg.setFillColor(sf::Color::Red);
+                            render->draw(msg);
+                            render->display();
+                            sf::sleep(sf::seconds(4));
+                            render->close();
+                            return;
+                        }else{
+                            render->draw(msg);
+                        }
+                    }
+
+                    if(!loadedFile){
+                        RESSOURCE_ERROR = std::string("Error to load file: " + iter.path().generic_string());
                     }
 
                     if(render) render->display();
                 }
             }
+            for(auto [key, vector]: groupedShaders){
+                game::resource::shader::loadFromFile(key, vector);
+            }
         }
 
         std::thread loadAll(){
-            std::thread thread(loadCallback, nullptr);
-            return thread;
+            if(!ALL_LOADED){
+                ALL_LOADED = true;
+                std::thread thread(loadCallback, nullptr);
+                return thread;
+            }
+
+            return std::thread();
         }
         void loadAll(sf::RenderWindow &render){
-            loadCallback(&render);
+            if(!ALL_LOADED) loadCallback(&render);
+            ALL_LOADED = true;
+        }
+        std::string getError(){
+            return RESSOURCE_ERROR;
         }
         void unloadAll(){
             for(auto it: Musics){

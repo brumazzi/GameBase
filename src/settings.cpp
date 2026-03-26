@@ -89,6 +89,7 @@ namespace game{
                 set["config"]["paths"]["resources"].push_back("./resources/musics/");
                 set["config"]["paths"]["resources"].push_back("./resources/sounds/");
                 set["config"]["paths"]["resources"].push_back("./resources/textures/");
+                set["config"]["paths"]["resources"].push_back("./resources/shaders/");
             }
         }
         bool save(std::string confFile){
