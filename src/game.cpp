@@ -7,6 +7,7 @@
 #include <cstring>
 #include <settings.hpp>
 #include <format>
+#include "physic.hpp"
 #include <yaml-cpp/yaml.h>
 
 namespace game{
@@ -470,6 +471,7 @@ namespace game{
                     objectInfo.bodyName,
                     {objectInfo.position[0], objectInfo.position[1]},
                     {objectInfo.size[0], objectInfo.size[1]},
+                    game::physic::body::ShapeType::RECTANGLE, // TODO: save bodyType to slots
                     (b2BodyType)objectInfo.bodyType
                 );
                 object->setDelay(objectInfo.animationDelay);

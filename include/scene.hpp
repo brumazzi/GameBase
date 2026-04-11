@@ -53,8 +53,9 @@ namespace game{
         const std::unordered_map<std::string, game::Object::Ptr> objects();
         void objectList(std::vector<std::string>& list);
         bool addObject(game::Object::Ptr object, std::string name = "");
-        game::Object::Ptr createObject(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size, b2BodyType type = b2_staticBody);
+        game::Object::Ptr createObject(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size, game::physic::body::ShapeType shape, b2BodyType type = b2_staticBody);
         void addSprite(game::scene::Layer layerID, std::string texture, sf::IntRect rect, sf::Vector2f pos);
+        void createPlayer(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size);
         void removeSprite(game::scene::Layer layerID, sf::Vector2f pos);
         void addCollisionArea(std::string name, sf::FloatRect rect);
         void updateCollisionArea(std::string name, sf::FloatRect rect);
@@ -76,6 +77,7 @@ namespace game{
         std::string m_name;
         std::string m_world;
         sf::Vector2u m_grid;
+        game::Object::Ptr m_player;
         std::unordered_map<std::string, game::Object::Ptr> m_objects;
         std::unordered_map<std::string, std::any> m_vars;
         std::unordered_map<std::string, sf::FloatRect> m_collisionArea;

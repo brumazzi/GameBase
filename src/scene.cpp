@@ -128,19 +128,45 @@ namespace game {
         this->m_objects[name] = object;
         return true;
     }
-    game::Object::Ptr Scene::createObject(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size, b2BodyType type){
+    game::Object::Ptr Scene::createObject(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size, game::physic::body::ShapeType shape, b2BodyType type){
         game::Object::Ptr newObject;
 
         if(texture.size()) newObject = game::Object::create(texture);
         else newObject = game::Object::create();
 
         if(game::physic::world::exists(this->m_world)){
-            game::physic::body::create(this->m_world, name, newObject, pos, size, type);
+            game::physic::body::create(this->m_world, name, newObject, pos, type);
+            switch(shape){
+                case game::physic::body::ShapeType::CIRCLE:
+                    game::physic::body::createShapeCircle(this->m_world, name, {0, 0}, (size.x+size.y)/2.0f);
+                    break;
+                case game::physic::body::ShapeType::CAPSULE:
+                    game::physic::body::createShapeCapsule(this->m_world, name, {0, -size.y/4.0f}, {0, size.y/4.0f}, (size.x+size.y)/4.0f);
+
+                    break;
+                case game::physic::body::ShapeType::RECTANGLE:
+                    game::physic::body::createShapeRectangle(this->m_world, name, {size.x/2.0f, size.y/2.0f}, 0.0);
+
+                    break;
+                case game::physic::body::ShapeType::POLYGON:
+                    // game::physic::body::createShapePolygon(this->m_world, name, {0, 0}, 0.0);
+
+                    break;
+                case game::physic::body::ShapeType::SEGMENT:
+                    game::physic::body::createShapeSegment(this->m_world, name, {-size.x/2.0f, -size.y/2.0f}, {size.x/2.0f, size.y/2.0f});
+
+                    break;
+            }
         }
         this->addObject(newObject, name);
         newObject->setSize(size);
 
         return newObject;
+    }
+    void Scene::createPlayer(std::string texture, std::string name, sf::Vector2f pos, sf::Vector2f size){
+        auto player = this->createObject(texture, name, pos, size, game::physic::body::ShapeType::CAPSULE, b2_dynamicBody);
+        this->m_player = player;
+        player->setType(game::object::Type::PLAYER);
     }
     void Scene::addSprite(game::scene::Layer layerID, std::string texture, sf::IntRect rect, sf::Vector2f pos){
         sf::Sprite* sprite = new sf::Sprite(*game::resource::texture::get(texture));
@@ -160,7 +186,8 @@ namespace game {
         rect.size.y = rect.size.y/2;
 
         this->m_collisionArea.emplace(name, rect);
-        game::physic::body::create(this->m_world, name, nullptr, rect.position, rect.size);
+        game::physic::body::create(this->m_world, name, nullptr, rect.position);
+        game::physic::body::createShapeRectangle(this->m_world, name, rect.size);
     }
     void Scene::updateCollisionArea(std::string name, sf::FloatRect rect){
         this->removeCollisionArea(name);

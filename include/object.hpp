@@ -3,11 +3,29 @@
 
 #include <SFML/Graphics.hpp>
 #include <map>
+#include <unordered_map>
 #include <vector>
 #include <memory>
 
 namespace game{
     typedef std::map<std::string, std::vector<sf::IntRect>> AnimationMap;
+    class Object;
+
+    namespace object{
+        enum Type{
+            // 1 - 99 is diferent objects
+            // 100, 200, 300, ... are boss types
+            // 101 to N is type of monsters
+            PLAYER = 0,
+
+            OBJECT = 1,
+
+            HABBIT = 101
+        };
+
+        typedef bool(*Event)(game::Object* object, void* data);
+    }
+
     class Object: public std::enable_shared_from_this<Object>{
         public:
         typedef std::shared_ptr<game::Object> Ptr;
@@ -34,6 +52,7 @@ namespace game{
         void setBodyName(std::string bodyName);
         void setWorldName(std::string worldName);
         void setSize(sf::Vector2f size);
+        void setType(game::object::Type type);
 
         uint16_t getDelay();
         std::string getBodyName();
@@ -41,6 +60,7 @@ namespace game{
         std::string getTextureName();
         std::string getAnimation();
         sf::Vector2f getSize();
+        game::object::Type getType();
 
         operator sf::Sprite();
 
@@ -51,12 +71,14 @@ namespace game{
         std::string m_texture;
         std::string m_animation;
         sf::Vector2f m_size;
+        std::unordered_map<std::string, game::object::Event> m_callbacks;
         AnimationMap m_animations;
         uint16_t m_animationDelay;
         uint16_t m_animationDelayCur;
         uint16_t m_animationIndex;
         bool m_destroyed;
         bool m_drawable;
+        game::object::Type m_type;
     };
 }
 

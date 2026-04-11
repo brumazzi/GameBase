@@ -9,11 +9,17 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <SFML/Window/WindowEnums.hpp>
+#include <cmath>
 #include <physic.hpp>
 #include <resource.hpp>
 #include <object.hpp>
 #include <scene.hpp>
 #include <settings.hpp>
+#include <box2d/box2d.h>
+#include <box2d/id.h>
+#include <box2d/math_functions.h>
+#include <box2d/types.h>
 #include <time.h>
 #include <splash.hpp>
 #include <game.hpp>
@@ -99,25 +105,17 @@ int main(){
         // waterMirrorSprite.setPosition(sf::Vector2f(0, WINDOW_HEIGHT));
         // waterMirrorSprite.setColor(sf::Color(0xffffff50));
 
+        sf::Shader* shader = game::resource::shader::get("simple:grid");
+        sf::RectangleShape shape;
+        shape.setSize({1368,768});
+        shape.setPosition({0,0});
+        // sf::RenderStates state;
+        // state.shader = shader;
+
         createLevel(game);
 
         sf::Clock deltaClock;
         sf::Clock clock;
-
-        sf::Shader* shader = game::resource::shader::get("test");
-        // shader.loadFromFile("clouds.frag", sf::Shader::Type::Fragment);
-        // shader.loadFromFile("simple.frag", sf::Shader::Type::Fragment);
-        sf::RenderStates states;
-        states.shader = shader;
-
-        sf::RectangleShape shape;
-        shape.setFillColor(sf::Color(0x1066Ac));
-        shape.setSize({1366,768});
-        shape.setPosition({0,0});
-        sf::Sprite sprite(*game::resource::texture::get("agua"));
-        sprite.setPosition({60,60});
-
-        sf::Vector2f texSize(game::resource::texture::get("rose")->getSize());
 
         while(window.isOpen()){
             while(const auto event = window.pollEvent()){
@@ -132,16 +130,26 @@ int main(){
                 if(event->is<sf::Event::KeyPressed>()){
                     auto keyPressed = event->getIf<sf::Event::KeyPressed>();
                     if(keyPressed->code == sf::Keyboard::Key::A){
-                        game->getScene("GameScene")->setGrid({16,16});
-                        game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{16,16}});
-                        game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{16*41,16*3}});
+                        // game->getScene("GameScene")->setGrid({16,16});
+                        // game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{16,16}});
+                        // game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{16*41,16*3}});
+                        // game::physic::body::setVelocity("default", "Player", {-16.0, 0.0});
                     }else if(keyPressed->code == sf::Keyboard::Key::S){
-                        game->getScene("GameScene")->setGrid({32,32});
-                        // game->getScene("GameScene")->removeCollisionArea("Platform");
-                        game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{32,32}});
-                        game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{32*41,32*3}});
+                        // game->getScene("GameScene")->setGrid({32,32});
+                        // // game->getScene("GameScene")->removeCollisionArea("Platform");
+                        // game->getScene("GameScene")->updateCollisionArea("Platform", {{0,1},{32,32}});
+                        // game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{32*41,32*3}});
+                        // game::physic::body::setVelocity("default", "Player", {16.0, 0.0});
                     }else if(keyPressed->code == sf::Keyboard::Key::V){
                         game->getScene("GameScene")->removeSprite(game::scene::FAR_FOREGROUND, {0,4});
+                    }else if(keyPressed->code == sf::Keyboard::Key::Space){
+                        // auto player = game->getScene("GameScene")->getObject("Player");
+                        // b2Body_ApplyLinearImpulse(game::physic::body::get("default", "Player"), {0.0f, -600.0f}, {0,0}, true);
+                        // game::physic::body::setVelocity("default", "Player", {0.0, -16.0});
+                        auto bodyId = game::physic::body::get("default", "Player");
+                        float mass = b2Body_GetMass(bodyId);
+                        b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, -mass*150}, true);
+
                     }
                 }
             }
@@ -158,18 +166,46 @@ int main(){
             game->update();
 
             window.clear(sf::Color(0x123456ff));
+            game::physic::world::eventHit();
+            game::physic::world::eventBeginTouch();
+            game::physic::world::eventEndTouch();
 
-            float elapsed = clock.getElapsedTime().asSeconds();
+            shader->setUniform("u_resolution", sf::Vector2f{1368.,768.});
+            shader->setUniform("u_time", clock.getElapsedTime().asSeconds());
 
-            // Passa uniforms
-            shader->setUniform("u_time", elapsed);
-            shader->setUniform("u_mouse", sf::Vector2f(sf::Mouse::getPosition(window)));
-            shader->setUniform("u_resolution", sf::Vector2f(window.getSize()));
 
+            window.draw(shape, shader);
             game->draw(window);
-            window.draw(shape, states);
-            // std::cout << sf::Mouse::getPosition(window).x << ' ' << sf::Mouse::getPosition(window).y << std::endl;
-            if (elapsed >= std::numbers::pi) clock.restart();
+
+            b2BodyId bodyId = game::physic::body::get("default", "Player");
+            float moveSpeed = 460.0f;
+            b2Vec2 point = b2Body_GetLocalCenterOfMass(bodyId);
+            b2Vec2 force;
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){
+                force = (b2Vec2){moveSpeed, 0.0f};
+                float speed = b2Body_GetLinearVelocity(bodyId).x;
+                speed = std::sqrt(speed*speed);
+                b2Body_ApplyForceToCenter(bodyId, force, true);
+                float speedY = game::physic::body::getVelocity("default", "Player").y;
+                if(speed > 6.0) b2Body_SetLinearVelocity(bodyId, {6.0, speedY});
+                std::cout << speed << std::endl;
+            }
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){
+                force = (b2Vec2){-moveSpeed, 0.0f};
+                float speed = b2Body_GetLinearVelocity(bodyId).x;
+                speed = std::sqrt(speed*speed);
+                b2Body_ApplyForceToCenter(bodyId, force, true);
+                float speedY = game::physic::body::getVelocity("default", "Player").y;
+                if(speed > 6.0) b2Body_SetLinearVelocity(bodyId, {-6.0, speedY});
+                std::cout << speed << std::endl;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)){
+                // b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, -1200.0f}, true);
+                float mass = b2Body_GetMass(bodyId);
+                std::cout << mass << std::endl;
+            }
 
 
             // waterMirrorTexture.update(window);
@@ -195,8 +231,24 @@ void createLevel(game::Game::Ptr game){
     // auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
     // collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
 
-    // auto object = scene->createObject("ground", "Ground", {1368/2, 17*32}, sf::Vector2f(684.0,32*1.5));
-    scene->addCollisionArea("Platform", {{0,1},{32,32}});
+    auto object = scene->createObject("", "Player", {1368/2, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    // auto object = scene->createObject("", "Player", {1368/2, 170}, sf::Vector2f(32,32), game::physic::body::ShapeType::CIRCLE, b2_dynamicBody);
+
+    // game::physic::body::setFriction("default", object, 0.1);
+    // object->addAnimation("Default", sf::IntRect({0,0},{32,32}));
+    // object->setAnimation("Default");
+    // object->setDelay(30);
+    // auto object2 = scene->createObject("", "XPlayer", {1368/2-64, 170}, sf::Vector2f(64,64), b2_dynamicBody);
+    // auto object3 = scene->createObject("", "ZPlayer", {1368/2-64, 300}, sf::Vector2f(32,32), b2_dynamicBody);
+    // auto object4 = scene->createObject("", "WPlayer", {1368/2-64, 450}, sf::Vector2f(32,32), b2_dynamicBody);
+    // game::physic::body::setFilterCategory("default", object4, game::physic::body::ObjectFilterType::ATTACK);
+
+    // game::physic::body::setFilterCategory("default", object, game::physic::body::ObjectFilterType::SOLID);
+    // game::physic::body::setFilterCategory("default", object2, game::physic::body::ObjectFilterType::SOLID);
+    // game::physic::body::setFilterCategory("default", object3, game::physic::body::ObjectFilterType::SOLID);
+    // game::physic::body::setFilterCategory("default", object4, game::physic::body::ObjectFilterType::SOLID);
+
+    // scene->addCollisionArea("Platform", {{0,1},{32,32}});
     scene->addCollisionArea("Ground", {{1,15},{32*41,32*3}});
     for(int i=0; i<15; i++){
         scene->addSprite(game::scene::Layer::FAR_FOREGROUND, "ground", sf::IntRect({{32*4,32*3}, {32,32}}), {0, (float)i});

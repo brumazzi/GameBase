@@ -9,8 +9,7 @@
 #include <settings.hpp>
 #include <filesystem>
 #include <thread>
-#include <vector>
-#include "utils.hpp"
+#include <utils.hpp>
 
 std::unordered_map<std::string, game::resource::Audio*> Musics;
 std::unordered_map<std::string, game::resource::Audio*> Sounds;
@@ -136,27 +135,24 @@ namespace game{
         }
 
         namespace shader{
-            sf::Shader* loadFromFile(std::string mask, std::vector<std::pair<std::string,std::string>> pathsPair){
+            // TODO: change to load 1 shader
+            sf::Shader* loadFromFile(std::string mask, std::string path){
                 sf::Shader* shader = new sf::Shader();
 
-                for(auto [path, ext]: pathsPair){
-                    std::string fullPath(path);
-                    fullPath.append(ext);
-                    if(!ext.compare(".vert")){
-                        if(!shader->loadFromFile(path, sf::Shader::Type::Vertex)){
-                            delete shader;
-                            return nullptr;
-                        }
-                    }else if(!ext.compare(".frag")){
-                        if(!shader->loadFromFile(path, sf::Shader::Type::Fragment)){
-                            delete shader;
-                            return nullptr;
-                        }
-                    }else if(!ext.compare(".geom") && game::vars::get<bool>("system.sfml.shader_geometry.active")){
-                        if(!shader->loadFromFile(path, sf::Shader::Type::Geometry)){
-                            delete shader;
-                            return nullptr;
-                        }
+                if(!path.compare(path.size()-4, 4, "vert")){
+                    if(!shader->loadFromFile(path, sf::Shader::Type::Vertex)){
+                        delete shader;
+                        return nullptr;
+                    }
+                }else if(!path.compare(path.size()-4, 4, "frag")){
+                    if(!shader->loadFromFile(path, sf::Shader::Type::Fragment)){
+                        delete shader;
+                        return nullptr;
+                    }
+                }else if(!path.compare(path.size()-4, 4, "geom") && game::vars::get<bool>("system.sfml.shader_geometry.active")){
+                    if(!shader->loadFromFile(path, sf::Shader::Type::Geometry)){
+                        delete shader;
+                        return nullptr;
                     }
                 }
                 Shaders[mask] = shader;
@@ -188,8 +184,6 @@ namespace game{
 
         static void loadCallback(sf::RenderWindow *render){
             // TODO: Generate hash for resources to validate
-            std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>> groupedShaders;
-
             for(auto path: game::settings::getPropertyNode("config.paths.resources")){
                 for(auto iter: std::filesystem::directory_iterator(path.as<std::string>())){
                     auto ext = iter.path().filename().extension();
@@ -208,11 +202,7 @@ namespace game{
                     }else if(!ext.compare(".png") || !ext.compare(".jpg") || !ext.compare(".bmp")){
                         loadedFile = texture::loadFromFile(fileName, iter.path().string());
                     }else if(!ext.compare(".frag") || !ext.compare(".vert") || !ext.compare(".geom")){
-                        std::vector<std::string> divisor;
-                        game::string::split(fileName, divisor, ':');
-
-                        groupedShaders[divisor[0]].push_back({iter.path().string(), ext.string()});
-                        continue;;
+                        loadedFile = shader::loadFromFile(fileName,  iter.path().string());
                     }
 
                     if(render){
@@ -244,9 +234,6 @@ namespace game{
 
                     if(render) render->display();
                 }
-            }
-            for(auto [key, vector]: groupedShaders){
-                game::resource::shader::loadFromFile(key, vector);
             }
         }
 
