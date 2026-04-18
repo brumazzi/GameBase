@@ -2,17 +2,18 @@
 #define __OBJECT_HPP__
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <map>
 #include <unordered_map>
 #include <vector>
 #include <memory>
+#include <animation.hpp>
 
 namespace game{
-    typedef std::map<std::string, std::vector<sf::IntRect>> AnimationMap;
-    class Object;
-
-    namespace object{
-        enum Type{
+    class Object: public std::enable_shared_from_this<Object>{
+        public:
+        enum class Type{
             // 1 - 99 is diferent objects
             // 100, 200, 300, ... are boss types
             // 101 to N is type of monsters
@@ -20,65 +21,67 @@ namespace game{
 
             OBJECT = 1,
 
-            HABBIT = 101
+            HABBIT_MONSTER = 101
         };
-
         typedef bool(*Event)(game::Object* object, void* data);
-    }
-
-    class Object: public std::enable_shared_from_this<Object>{
-        public:
         typedef std::shared_ptr<game::Object> Ptr;
+
         static Object::Ptr create();
-        static Object::Ptr create(std::string texture);
 
         Object();
-        Object(sf::Texture *texture);
-        Object(std::string texture);
+        // Object(sf::Texture *texture);
+        // Object(std::string texture);
         ~Object();
         sf::Sprite &sprite();
         void update();
         void destroy();
         bool isDestroyed();
         bool isDrawable();
+        bool isGrounded();
 
-        AnimationMap animations();
-        void addAnimation(std::string key, sf::IntRect rect);
+        void jump();
+
+        // AnimationMap animations();
+        game::Animation::Ptr createAnimation(std::string key, std::pair<std::string, sf::Texture*> texture);
         void removeAnimation(std::string key);
-        void removeAnimationFrame(std::string key, unsigned int frame);
         void setAnimation(std::string key);
+        std::pair<std::string, game::Animation::Ptr> getAnimation();
 
-        void setDelay(uint16_t delay);
+        void setDrawable(bool drawable);
+        // void setDelay(uint16_t delay);
         void setBodyName(std::string bodyName);
         void setWorldName(std::string worldName);
         void setSize(sf::Vector2f size);
-        void setType(game::object::Type type);
+        void setType(game::Object::Type type);
+        void setForce(float force);
+        void setGrounded(bool grounded = true);
+        void setFriction(float friction);
 
-        uint16_t getDelay();
+        // uint16_t getDelay();
         std::string getBodyName();
         std::string getWorldName();
         std::string getTextureName();
-        std::string getAnimation();
         sf::Vector2f getSize();
-        game::object::Type getType();
+        game::Object::Type getType();
+        float getForce();
+        float getFriction();
 
         operator sf::Sprite();
 
         private:
         std::string m_bodyName;
         std::string m_worldName;
-        std::shared_ptr<sf::Sprite> m_sprite;
         std::string m_texture;
-        std::string m_animation;
         sf::Vector2f m_size;
-        std::unordered_map<std::string, game::object::Event> m_callbacks;
-        AnimationMap m_animations;
-        uint16_t m_animationDelay;
-        uint16_t m_animationDelayCur;
-        uint16_t m_animationIndex;
+        float m_force;
+        float m_friction;
+        std::pair<std::string, game::Animation::Ptr> m_animation;
+        std::unordered_map<std::string, game::Object::Event> m_callbacks;
+        std::unordered_map<std::string, game::Animation::Ptr> m_animations;
         bool m_destroyed;
         bool m_drawable;
-        game::object::Type m_type;
+        bool m_grounded;
+        game::Object::Type m_type;
     };
 }
 

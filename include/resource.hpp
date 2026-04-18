@@ -43,7 +43,7 @@ namespace game{
             Audio* loadFromFile(std::string mask, std::string path, Audio::Type type);
             // Audio* loadFromMemory(std::string mask,void *buff, std::size_t size, Audio::Type type);
             void remove(std::string mask, Audio::Type type);
-            Audio* get(std::string mask, Audio::Type type);
+            std::pair<std::string, Audio*> get(std::string mask, Audio::Type type);
             std::string mask(Audio* audio, Audio::Type type);
         }
 
@@ -51,14 +51,14 @@ namespace game{
             sf::Texture* loadFromFile(std::string mask, std::string path);
             // sf::Texture* loadFromMemory(std::string mask,void *buff, std::size_t size);
             void remove(std::string mask);
-            sf::Texture* get(std::string mask);
+            std::pair<std::string, sf::Texture*> get(std::string mask);
             std::string mask(sf::Texture* texture);
         }
 
         namespace shader{
             sf::Shader* loadFromFile(std::string mask, std::vector<std::pair<std::string,std::string>> pathsPair);
             void remove(std::string mask);
-            sf::Shader* get(std::string mask);
+            std::pair<std::string, sf::Shader*> get(std::string mask);
             std::string mask(sf::Shader* shader);
         }
 

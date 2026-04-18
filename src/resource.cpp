@@ -58,17 +58,17 @@ namespace game{
 
                 delete audio;
             }
-            Audio* get(std::string mask, Audio::Type type){
+            std::pair<std::string, Audio*> get(std::string mask, Audio::Type type){
                 Audio* audio = nullptr;
                 if(type == Audio::Type::MUSIC){
-                    if(!Musics.contains(mask)) return audio;
+                    if(!Musics.contains(mask)) return {mask, audio};
                     audio = Musics[mask];
                 }else if(type == Audio::Type::SOUND){
-                    if(!Sounds.contains(mask)) return audio;
+                    if(!Sounds.contains(mask)) return {mask, audio};
                     audio = Sounds[mask];
                 }
 
-                return audio;
+                return {mask, audio};
             }
             std::string mask(Audio* audio, Audio::Type type){
                 if(type == Audio::Type::MUSIC){
@@ -116,10 +116,10 @@ namespace game{
                 delete Textures[mask];
                 Textures.erase(mask);
             }
-            sf::Texture* get(std::string mask){
-                if(!Textures.contains(mask)) return nullptr;
+            std::pair<std::string, sf::Texture*> get(std::string mask){
+                if(!Textures.contains(mask)) return {mask, nullptr};
 
-                return Textures[mask];
+                return {mask, Textures[mask]};
             }
             std::string mask(sf::Texture* texture){
                 auto it = std::find_if(Textures.begin(), Textures.end(), [&texture](const auto& pair){
@@ -164,10 +164,10 @@ namespace game{
                 delete Shaders[mask];
                 Shaders.erase(mask);
             }
-            sf::Shader* get(std::string mask){
-                if(!Shaders.contains(mask)) return nullptr;
+            std::pair<std::string, sf::Shader*> get(std::string mask){
+                if(!Shaders.contains(mask)) return {mask, nullptr};
 
-                return Shaders[mask];
+                return {mask, Shaders[mask]};
             }
             std::string mask(sf::Shader* shader){
                 auto it = std::find_if(Shaders.begin(), Shaders.end(), [&shader](const auto& pair){

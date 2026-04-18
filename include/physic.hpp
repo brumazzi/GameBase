@@ -66,7 +66,9 @@ namespace game{
                 SEGMENT
             };
 
-            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true);
+            const float BASE_FORCE = 460.0f;
+
+            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true);
 
             b2ShapeId createShapeCircle(std::string world, std::string bodyName, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
             b2ShapeId createShapeCapsule(std::string world, std::string bodyName, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
@@ -74,19 +76,19 @@ namespace game{
             b2ShapeId createShapeRectangle(std::string world, std::string bodyName, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
             b2ShapeId createShapeSegment(std::string world, std::string bodyName, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
 
-            b2ShapeId createShapeCircle(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeCapsule(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapePolygon(std::string world, std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeRectangle(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeSegment(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeCircle(game::Object* object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeCapsule(game::Object* object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapePolygon(game::Object* object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeRectangle(game::Object* object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeSegment(game::Object* object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
 
 
-            b2BodyId& get(std::string world, std::shared_ptr<game::Object> object);
+            b2BodyId& get(game::Object* object);
             b2BodyId& get(std::string world, std::string body);
 
-            void destroy(std::string world, std::shared_ptr<game::Object> object);
+            void destroy(game::Object* object);
             void destroy(std::string world, std::string body);
-            bool exists(std::string world, std::shared_ptr<game::Object> object);
+            bool exists(game::Object* object);
             bool exists(std::string world, std::string body);
 
             game::Object* getObject(std::string world, std::string body);
@@ -101,19 +103,20 @@ namespace game{
             ObjectFilterType getFilterMask(std::string world, std::string body);
             ObjectFilterType getFilterCategory(std::string world, std::string body);
 
-            sf::Vector2f getPosition(std::string world, std::shared_ptr<game::Object> object);
-            sf::Vector2f getVelocity(std::string world, std::shared_ptr<game::Object> object);
-            // sf::Vector2f getSize(std::string world, std::shared_ptr<game::Object> object);
-            b2BodyType getType(std::string world, std::shared_ptr<game::Object> object);
-            float getDensity(std::string world, std::shared_ptr<game::Object> object);
-            float getFriction(std::string world, std::shared_ptr<game::Object> object);
-            float getRestitution(std::string world, std::shared_ptr<game::Object> object);
-            bool getFixRotation(std::string world, std::shared_ptr<game::Object> object);
-            ObjectFilterType getFilterMask(std::string world, std::shared_ptr<game::Object> object);
-            ObjectFilterType getFilterCategory(std::string world, std::shared_ptr<game::Object> object);
+            sf::Vector2f getPosition(game::Object* object);
+            sf::Vector2f getVelocity(game::Object* object);
+            // sf::Vector2f getSize(game::Object* object);
+            b2BodyType getType(game::Object* object);
+            float getDensity(game::Object* object);
+            float getFriction(game::Object* object);
+            float getRestitution(game::Object* object);
+            bool getFixRotation(game::Object* object);
+            ObjectFilterType getFilterMask(game::Object* object);
+            ObjectFilterType getFilterCategory(game::Object* object);
 
             void setPosition(std::string world, std::string body, sf::Vector2f position);
             void setVelocity(std::string world, std::string body, sf::Vector2f velocity);
+            void applyForce(std::string world, std::string body, sf::Vector2f force);
             // void setSize(std::string world, std::string body, sf::Vector2f size);
             void setType(std::string world, std::string body, b2BodyType type);
             void setDensity(std::string world, std::string body, float density);
@@ -123,16 +126,48 @@ namespace game{
             void setFilterMask(std::string world, std::string body, ObjectFilterType objectFilterType);
             void setFilterCategory(std::string world, std::string body, ObjectFilterType objectFilterType, bool autoSet = true);
 
-            void setPosition(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f position);
-            void setVelocity(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f velocity);
-            // void setSize(std::string world, std::shared_ptr<game::Object> object, sf::Vector2f size);
-            void setType(std::string world, std::shared_ptr<game::Object> object, b2BodyType type);
-            void setDensity(std::string world, std::shared_ptr<game::Object> object, float density);
-            void setFriction(std::string world, std::shared_ptr<game::Object> object, float friction);
-            void setRestitution(std::string world, std::shared_ptr<game::Object> object, float restitution);
-            void setFixRotation(std::string world, std::shared_ptr<game::Object> object, bool fixRotation);
-            void setFilterMask(std::string world, std::shared_ptr<game::Object> object, ObjectFilterType objectFilterType);
-            void setFilterCategory(std::string world, std::shared_ptr<game::Object> object, ObjectFilterType objectFilterType, bool autoSet = true);
+            void setPosition(game::Object* object, sf::Vector2f position);
+            void setVelocity(game::Object* object, sf::Vector2f velocity);
+            void applyForce(game::Object* object, sf::Vector2f force);
+            // void setSize(game::Object* object, sf::Vector2f size);
+            void setType(game::Object* object, b2BodyType type);
+            void setDensity(game::Object* object, float density);
+            void setFriction(game::Object* object, float friction);
+            void setRestitution(game::Object* object, float restitution);
+            void setFixRotation(game::Object* object, bool fixRotation);
+            void setFilterMask(game::Object* object, ObjectFilterType objectFilterType);
+            void setFilterCategory(game::Object* object, ObjectFilterType objectFilterType, bool autoSet = true);
+
+            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true);
+            b2ShapeId createShapeCircle(std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeCapsule(std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapePolygon(std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeRectangle(std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeSegment(std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2BodyId& get(std::shared_ptr<game::Object> object);
+            void destroy(std::shared_ptr<game::Object> object);
+            bool exists(std::shared_ptr<game::Object> object);
+            sf::Vector2f getPosition(std::shared_ptr<game::Object> object);
+            sf::Vector2f getVelocity(std::shared_ptr<game::Object> object);
+            // sf::Vector2f getSize(std::shared_ptr<game::Object> object);
+            b2BodyType getType(std::shared_ptr<game::Object> object);
+            float getDensity(std::shared_ptr<game::Object> object);
+            float getFriction(std::shared_ptr<game::Object> object);
+            float getRestitution(std::shared_ptr<game::Object> object);
+            bool getFixRotation(std::shared_ptr<game::Object> object);
+            ObjectFilterType getFilterMask(std::shared_ptr<game::Object> object);
+            ObjectFilterType getFilterCategory(std::shared_ptr<game::Object> object);
+            void setPosition(std::shared_ptr<game::Object> object, sf::Vector2f position);
+            void setVelocity(std::shared_ptr<game::Object> object, sf::Vector2f velocity);
+            void applyForce(std::shared_ptr<game::Object> object, sf::Vector2f force);
+            // void setSize(std::shared_ptr<game::Object> object, sf::Vector2f size);
+            void setType(std::shared_ptr<game::Object> object, b2BodyType type);
+            void setDensity(std::shared_ptr<game::Object> object, float density);
+            void setFriction(std::shared_ptr<game::Object> object, float friction);
+            void setRestitution(std::shared_ptr<game::Object> object, float restitution);
+            void setFixRotation(std::shared_ptr<game::Object> object, bool fixRotation);
+            void setFilterMask(std::shared_ptr<game::Object> object, ObjectFilterType objectFilterType);
+            void setFilterCategory(std::shared_ptr<game::Object> object, ObjectFilterType objectFilterType, bool autoSet = true);
         }
     }
 }

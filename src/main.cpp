@@ -29,6 +29,7 @@
 #include <utils.hpp>
 #include <settings.hpp>
 #include <vars.hpp>
+#include "animation.hpp"
 #include <imgui/imgui.h>
 #include <imgui-SFML.h>
 
@@ -37,7 +38,7 @@ void createLevel(game::Game::Ptr game);
 int main(){
     game::settings::init("settings.cfg");
     game::translate::load();
-    sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+    // sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
 
     // BEGIN_SETTINGS_WINDOW: { // block to load settings window before game start
     //     sf::RenderWindow window(sf::VideoMode({640,480}), game::string::str_to_utf32(t("setting.window.title")), 0);
@@ -105,7 +106,7 @@ int main(){
         // waterMirrorSprite.setPosition(sf::Vector2f(0, WINDOW_HEIGHT));
         // waterMirrorSprite.setColor(sf::Color(0xffffff50));
 
-        sf::Shader* shader = game::resource::shader::get("simple:grid");
+        auto [shaderKey, shader] = game::resource::shader::get("simple:grid");
         sf::RectangleShape shape;
         shape.setSize({1368,768});
         shape.setPosition({0,0});
@@ -141,15 +142,23 @@ int main(){
                         // game->getScene("GameScene")->updateCollisionArea("Ground", {{1,15},{32*41,32*3}});
                         // game::physic::body::setVelocity("default", "Player", {16.0, 0.0});
                     }else if(keyPressed->code == sf::Keyboard::Key::V){
-                        game->getScene("GameScene")->removeSprite(game::scene::FAR_FOREGROUND, {0,4});
+                        // game->getScene("GameScene")->removeSprite(game::scene::FAR_FOREGROUND, {0,4});
+                        auto player = game->getScene("GameScene")->getObject("Player");
+                        if(!player->getAnimation().first.compare("Middle")){
+                            player->setAnimation("Default");
+                        }else{
+                            player->setAnimation("Middle");
+                        }
                     }else if(keyPressed->code == sf::Keyboard::Key::Space){
                         // auto player = game->getScene("GameScene")->getObject("Player");
                         // b2Body_ApplyLinearImpulse(game::physic::body::get("default", "Player"), {0.0f, -600.0f}, {0,0}, true);
                         // game::physic::body::setVelocity("default", "Player", {0.0, -16.0});
                         auto bodyId = game::physic::body::get("default", "Player");
-                        float mass = b2Body_GetMass(bodyId);
-                        b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, -mass*150}, true);
-
+                        game::Object* player = (game::Object*) b2Body_GetUserData(bodyId);
+                        float force = -460.0f;
+                        // b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, force*17}, true);
+                        player->jump();
+                        // std::cout << mass << ' ' << mass*150 << std::endl;
                     }
                 }
             }
@@ -178,33 +187,58 @@ int main(){
             game->draw(window);
 
             b2BodyId bodyId = game::physic::body::get("default", "Player");
+            b2BodyId bodyId2 = game::physic::body::get("default", "Player2");
             float moveSpeed = 460.0f;
-            b2Vec2 point = b2Body_GetLocalCenterOfMass(bodyId);
+            float increaseSpeed = 10.0f;
+            // b2Vec2 point = b2Body_GetLocalCenterOfMass(bodyId);
             b2Vec2 force;
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)){
                 force = (b2Vec2){moveSpeed, 0.0f};
                 float speed = b2Body_GetLinearVelocity(bodyId).x;
                 speed = std::sqrt(speed*speed);
                 b2Body_ApplyForceToCenter(bodyId, force, true);
                 float speedY = game::physic::body::getVelocity("default", "Player").y;
-                if(speed > 6.0) b2Body_SetLinearVelocity(bodyId, {6.0, speedY});
-                std::cout << speed << std::endl;
+                increaseSpeed *= (float) sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+                if(speed > (6.0+increaseSpeed)) b2Body_SetLinearVelocity(bodyId, {6.0f+increaseSpeed, speedY});
+                // std::cout << speed << std::endl;
             }
 
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)){
                 force = (b2Vec2){-moveSpeed, 0.0f};
                 float speed = b2Body_GetLinearVelocity(bodyId).x;
                 speed = std::sqrt(speed*speed);
                 b2Body_ApplyForceToCenter(bodyId, force, true);
                 float speedY = game::physic::body::getVelocity("default", "Player").y;
-                if(speed > 6.0) b2Body_SetLinearVelocity(bodyId, {-6.0, speedY});
-                std::cout << speed << std::endl;
+                increaseSpeed *= (float) sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+                if(speed > (6.0+increaseSpeed)) b2Body_SetLinearVelocity(bodyId, {-6.0f-increaseSpeed, speedY});
+                // std::cout << speed << std::endl;
+            }
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D)){
+                force = (b2Vec2){moveSpeed, 0.0f};
+                float speed = b2Body_GetLinearVelocity(bodyId2).x;
+                speed = std::sqrt(speed*speed);
+                b2Body_ApplyForceToCenter(bodyId2, force, true);
+                float speedY = game::physic::body::getVelocity("default", "Player2").y;
+                increaseSpeed *= (float) sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+                if(speed > (6.0+increaseSpeed)) b2Body_SetLinearVelocity(bodyId2, {6.0f+increaseSpeed, speedY});
+                // std::cout << speed << std::endl;
+            }
+
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A)){
+                force = (b2Vec2){-moveSpeed, 0.0f};
+                float speed = b2Body_GetLinearVelocity(bodyId2).x;
+                speed = std::sqrt(speed*speed);
+                b2Body_ApplyForceToCenter(bodyId2, force, true);
+                float speedY = game::physic::body::getVelocity("default", "Player2").y;
+                increaseSpeed *= (float) sf::Keyboard::isKeyPressed(sf::Keyboard::Key::LShift);
+                if(speed > (6.0+increaseSpeed)) b2Body_SetLinearVelocity(bodyId2, {-6.0f-increaseSpeed, speedY});
+                // std::cout << speed << std::endl;
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)){
                 // b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, -1200.0f}, true);
-                float mass = b2Body_GetMass(bodyId);
-                std::cout << mass << std::endl;
+                // float mass = b2Body_GetMass(bodyId);
+                // std::cout << mass << std::endl;
             }
 
 
@@ -231,7 +265,30 @@ void createLevel(game::Game::Ptr game){
     // auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
     // collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
 
-    auto object = scene->createObject("", "Player", {1368/2, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    auto object = scene->createObject("Player", {1368/2.0, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    // auto object2 = scene->createObject("Player1", {1368/2.0-72, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    auto object3 = scene->createObject("Player2", {1368/2.0+72, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    object->setDrawable(true);
+    // object2->setDrawable(false);
+    object3->setDrawable(false);
+    game::physic::body::setFilterCategory(object, game::physic::body::ObjectFilterType::SOLID);
+    // game::physic::body::setFilterCategory(object2, game::physic::body::ObjectFilterType::SOLID);
+    game::physic::body::setFilterCategory(object3, game::physic::body::ObjectFilterType::SOLID);
+    auto animation = object->createAnimation("Default", game::resource::texture::get("ground"));
+    animation->addFrame(sf::IntRect({0*32,0*32},{32,32}));
+    animation->addFrame(sf::IntRect({1*32,0*32},{32,32}));
+    animation->addFrame(sf::IntRect({2*32,0*32},{32,32}));
+    // animation->setMode(game::Animation::Mode::STOP_ON_END);
+    object->setAnimation("Default");
+    animation = object->createAnimation("Middle", game::resource::texture::get("ground"));
+    animation->addFrame(sf::IntRect({0*32,1*32},{32,32}));
+    animation->addFrame(sf::IntRect({1*32,1*32},{32,32}));
+    animation->addFrame(sf::IntRect({2*32,1*32},{32,32}));
+
+    // game::physic::body::setFriction("default", "Player", 60);
+    // animation->addFrame(sf::IntRect({0*32,0*32},{32,32}));
+    // animation->addFrame(sf::IntRect({0*32,0*32},{32,32}));
+    // animation->addFrame(sf::IntRect({0*32,0*32},{32,32}));
     // auto object = scene->createObject("", "Player", {1368/2, 170}, sf::Vector2f(32,32), game::physic::body::ShapeType::CIRCLE, b2_dynamicBody);
 
     // game::physic::body::setFriction("default", object, 0.1);
@@ -250,6 +307,8 @@ void createLevel(game::Game::Ptr game){
 
     // scene->addCollisionArea("Platform", {{0,1},{32,32}});
     scene->addCollisionArea("Ground", {{1,15},{32*41,32*3}});
+    scene->addCollisionArea("Wall", {{15,11},{32*4,32*4}}, 0.1);
+    scene->addCollisionArea("Ground2", {{39,14},{32,32}});
     for(int i=0; i<15; i++){
         scene->addSprite(game::scene::Layer::FAR_FOREGROUND, "ground", sf::IntRect({{32*4,32*3}, {32,32}}), {0, (float)i});
     }

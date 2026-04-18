@@ -1,108 +1,135 @@
+#include <SFML/Graphics/Sprite.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <object.hpp>
 #include <physic.hpp>
 #include <resource.hpp>
+#include "animation.hpp"
 
 namespace game {
-    Object::Ptr Object::create() { return std::make_shared<game::Object>(); }
-    Object::Ptr Object::create(std::string texture) { return std::make_shared<game::Object>(texture); }
+    Object::Ptr Object::create() { return std::make_shared<Object>(); }
 
     Object::Object() {
         this->m_destroyed = false;
-        this->m_drawable = false;
-        this->m_type = game::object::Type::OBJECT;
+        this->m_drawable = true;
+        this->m_type = Object::Type::OBJECT;
+        this->m_grounded = false;
+        this->m_force = 17.0f;
     }
 
-    Object::Object(sf::Texture* texture) {
-        this->m_sprite = std::make_shared<sf::Sprite>(*texture);
-        this->m_animationIndex = 0;
-        this->m_destroyed = false;
-        this->m_drawable = true;
-        this->m_texture = game::resource::texture::mask(texture);
-        this->m_type = game::object::Type::OBJECT;
+    Object::~Object() {
+        this->m_animations.clear();
     }
-    Object::Object(std::string texture) {
-        this->m_sprite = std::make_shared<sf::Sprite>(*resource::texture::get(texture));
-        this->m_animationIndex = 0;
-        this->m_destroyed = false;
-        this->m_drawable = true;
-        this->m_texture = texture;
-        this->m_type = game::object::Type::OBJECT;
-    }
-    Object::~Object() {}
 
-    sf::Sprite& Object::sprite() { return *this->m_sprite; }
+    sf::Sprite& Object::sprite() { return this->m_animation.second->sprite(); }
     void Object::update() {
         if (this->m_destroyed)
             return;
 
-        if (this->m_drawable) {
-            if (game::physic::body::exists(this->m_worldName, this->m_bodyName)) {
-                sf::Vector2f position(game::physic::body::getPosition(this->m_worldName, this->m_bodyName));
-                sf::Vector2f scale = this->m_sprite->getScale();
-                sf::IntRect rect = this->m_sprite->getTextureRect();
+        if (this->m_drawable && this->m_animations.size()) {
+            if (physic::body::exists(this->m_worldName, this->m_bodyName)) {
+                sf::Vector2f position(physic::body::getPosition(this->m_worldName, this->m_bodyName));
+                sf::Sprite& sprite = this->sprite();
+
+                sf::Vector2f scale = sprite.getScale();
+                sf::IntRect rect = sprite.getTextureRect();
 
                 position.x -= (rect.size.x * scale.x) / 2;
                 position.y -= (rect.size.y * scale.y) / 2;
-                this->m_sprite->setPosition(position);
+                sprite.setPosition(position);
+
+                if(this->m_friction > 0.7) this->setFriction(this->m_friction-5);
+                else if(this->m_friction < 0.7) this->setFriction(0.7f);
+                if(this->m_friction > 0.7) std::cout << this->m_friction << std::endl;
+
+                if(this->m_grounded){
+                    sf::Vector2f velocity = game::physic::body::getVelocity(this);
+                    if((std::abs((int)velocity.y)) > 0.1) this->m_grounded = false;
+                }
             }
 
-            if (this->m_animations.contains(this->m_animation)) {
-                if (!this->m_animationDelayCur) {
-                    this->m_animationDelayCur = this->m_animationDelay + 1;
-                    this->m_animationIndex = (this->m_animationIndex + 1) % this->m_animations[this->m_animation].size();
-                    this->m_sprite->setTextureRect(this->m_animations[this->m_animation][this->m_animationIndex]);
-                }
-                this->m_animationDelayCur--;
-            }
+            this->m_animation.second->update();
+
+            // if (this->m_animations.contains(this->m_animation)) {
+            //     if (!this->m_animationDelayCur) {
+            //         this->m_animationDelayCur = this->m_animationDelay + 1;
+            //         this->m_animationIndex = (this->m_animationIndex + 1) % this->m_animations[this->m_animation].size();
+            //         this->m_sprite->setTextureRect(this->m_animations[this->m_animation][this->m_animationIndex]);
+            //     }
+            //     this->m_animationDelayCur--;
+            // }
         }
 
         for(auto [key, callback]: this->m_callbacks){
             if(!callback(this, nullptr)) break;
         }
         // if(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)){
-        //     game::physic::body::setVelocity("default", "Player", {0.0, -16.0});
+        //     physic::body::setVelocity("default", "Player", {0.0, -16.0});
         // }
     }
     void Object::destroy() { this->m_destroyed = true; }
     bool Object::isDestroyed() { return this->m_destroyed; }
     bool Object::isDrawable() { return this->m_drawable; }
+    bool Object::isGrounded() { return this->m_grounded; }
+    void Object::jump() {
+        if(!this->m_grounded) return;
 
-    AnimationMap Object::animations() { return this->m_animations; }
-    void Object::addAnimation(std::string key, sf::IntRect rect) { this->m_animations[key].emplace_back(rect); }
+        physic::body::applyForce(this->getWorldName(), this->getBodyName(), {0.0, -game::physic::body::BASE_FORCE*this->m_force});
+    }
+
+    // AnimationMap Object::animations() { return this->m_animations; }
+    Animation::Ptr Object::createAnimation(std::string key, std::pair<std::string, sf::Texture*> texture){
+        auto animation = Animation::create(texture);
+        this->m_animations[key] = animation;
+        return animation;
+    }
+    // void Object::addAnimation(std::string key, sf::IntRect rect) { this->m_animations[key].emplace_back(rect); }
     void Object::removeAnimation(std::string key) {
         if (this->m_animations.contains(key)) {
             this->m_animations.erase(key);
         }
     }
-    void Object::removeAnimationFrame(std::string key, unsigned int frame) {
-        if (this->m_animations.contains(key)) {
-            if (this->m_animations[key].size() > frame) {
-                this->m_animations[key].erase(this->m_animations[key].begin() + frame);
-            }
-        }
-    }
+    // void Object::removeAnimationFrame(std::string key, unsigned int frame) {
+    //     if (this->m_animations.contains(key)) {
+    //         if (this->m_animations[key].size() > frame) {
+    //             this->m_animations[key].erase(this->m_animations[key].begin() + frame);
+    //         }
+    //     }
+    // }
     void Object::setAnimation(std::string key) {
-        this->m_animation = key;
-        this->m_animationIndex = 0;
-    }
-    std::string Object::getAnimation() { return this->m_animation; }
+        if(!this->m_animations.contains((key))) return;
 
-    void Object::setDelay(uint16_t delay) {
-        this->m_animationDelay = delay;
-        this->m_animationDelayCur = delay;
+        this->m_animation.first = key;
+        this->m_animation.second = this->m_animations[key];
+        this->m_animation.second->resetFrame();
     }
+    std::pair<std::string, Animation::Ptr> Object::getAnimation() { return this->m_animation; }
+
+    // void Object::setDelay(uint16_t delay) {
+    //     this->m_animationDelay = delay;
+    //     this->m_animationDelayCur = delay;
+    // }
+    void Object::setDrawable(bool drawable){ this->m_drawable = drawable; }
     void Object::setBodyName(std::string bodyName) { this->m_bodyName = bodyName; }
     void Object::setWorldName(std::string worldName) { this->m_worldName = worldName; }
     void Object::setSize(sf::Vector2f size) { this->m_size = size; }
-    void Object::setType(game::object::Type type) { this->m_type = type; }
-    uint16_t Object::getDelay() { return this->m_animationDelay; }
+    void Object::setType(Object::Type type) { this->m_type = type; }
+    void Object::setForce(float force){ this->m_force = force; }
+    void Object::setGrounded(bool grounded){ this->m_grounded = grounded; }
+    void Object::setFriction(float friction){
+        this->m_friction = friction;
+        game::physic::body::setFriction(this, friction);
+    }
+
+    // uint16_t Object::getDelay() { return this->m_animationDelay; }
     std::string Object::getBodyName() { return this->m_bodyName; }
     std::string Object::getWorldName() { return this->m_worldName; }
     std::string Object::getTextureName() { return this->m_texture; }
     sf::Vector2f Object::getSize() { return this->m_size; }
-    game::object::Type Object::getType(){ return this->m_type; }
+    Object::Type Object::getType(){ return this->m_type; }
+    float Object::getForce(){ return this->m_force; }
+    float Object::getFriction(){ return this->m_friction; }
 
-    Object::operator sf::Sprite() { return *this->m_sprite; }
+    Object::operator sf::Sprite() { return (sf::Sprite) this->m_animation.second->sprite(); }
 }  // namespace game

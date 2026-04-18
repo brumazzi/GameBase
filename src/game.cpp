@@ -172,7 +172,7 @@ namespace game{
     void Game::createSlots(){
         SlotInfo slot;
         char *cslot = (char*) &slot;
-        for(int i=0; i<sizeof(SlotInfo); i++) cslot[i] = 0;
+        for(long unsigned int i=0; i<sizeof(SlotInfo); i++) cslot[i] = 0;
 
         this->m_slots.emplace_back(slot);
         this->m_currentSlotInfo = this->m_slots.size()-1;
@@ -210,7 +210,7 @@ namespace game{
 
         std::ofstream output(savePath);
         if(output.is_open()){
-            for(const auto slot: this->m_slots){
+            for(const auto& slot: this->m_slots){
                 output.write(reinterpret_cast<const char*>(&slot), sizeof(SlotInfo));
             }
             output.close();
@@ -258,251 +258,251 @@ namespace game{
 
         return this->m_slots;
     }
-    bool Game::saveToSlot(sf::RenderWindow& window){
-        std::string savePath = game::settings::getHomeDir();
-        #ifdef __WIN32
-        savePath.append("/game/");
-        #else
-        savePath.append("/.game/");
-        #endif
+    // bool Game::saveToSlot(sf::RenderWindow& window){
+    //     std::string savePath = game::settings::getHomeDir();
+    //     #ifdef __WIN32
+    //     savePath.append("/game/");
+    //     #else
+    //     savePath.append("/.game/");
+    //     #endif
 
-        std::filesystem::path dir(savePath);
-        if (!std::filesystem::exists(dir)) {
-            std::filesystem::create_directory(dir);
-        }
-        char fileName[16];
-        sprintf(fileName, "/slot_%.2d.bin", this->m_currentSlotInfo);
-        savePath.append(fileName);
+    //     std::filesystem::path dir(savePath);
+    //     if (!std::filesystem::exists(dir)) {
+    //         std::filesystem::create_directory(dir);
+    //     }
+    //     char fileName[16];
+    //     sprintf(fileName, "/slot_%.2d.bin", this->m_currentSlotInfo);
+    //     savePath.append(fileName);
 
-        std::ofstream output(savePath);
+    //     std::ofstream output(savePath);
 
-        // count global vars and scenes in game
-        GameData gameData;
-        std::vector<std::string> varList;
-        game::vars::list(varList);
+    //     // count global vars and scenes in game
+    //     GameData gameData;
+    //     std::vector<std::string> varList;
+    //     game::vars::list(varList);
 
-        std::strcpy(gameData.currentScene, this->m_currentScene.c_str());
-        gameData.globalVarsCount = varList.size();
-        gameData.scenesCount = this->m_scenes.size();
-        gameData.viewLimits[0] = this->m_viewMinPosition.x;
-        gameData.viewLimits[1] = this->m_viewMinPosition.y;
-        gameData.viewLimits[2] = this->m_viewMaxPosition.x;
-        gameData.viewLimits[3] = this->m_viewMaxPosition.y;
-        output.write(reinterpret_cast<const char*>(&gameData), sizeof(GameData));
+    //     std::strcpy(gameData.currentScene, this->m_currentScene.c_str());
+    //     gameData.globalVarsCount = varList.size();
+    //     gameData.scenesCount = this->m_scenes.size();
+    //     gameData.viewLimits[0] = this->m_viewMinPosition.x;
+    //     gameData.viewLimits[1] = this->m_viewMinPosition.y;
+    //     gameData.viewLimits[2] = this->m_viewMaxPosition.x;
+    //     gameData.viewLimits[3] = this->m_viewMaxPosition.y;
+    //     output.write(reinterpret_cast<const char*>(&gameData), sizeof(GameData));
 
-        for(auto var: varList){
-            GameVar gameVar;
-            std::strcpy(gameVar.name, var.c_str());
-            if(game::vars::is<long>(var)){
-                gameVar.type = GameVarType::LONG;
-                gameVar.value.l = game::vars::get<long>(var);
-            }else if(game::vars::is<double>(var)){
-                gameVar.type = GameVarType::DOUBLE;
-                gameVar.value.d = game::vars::get<double>(var);
-            }else if(game::vars::is<bool>(var)){
-                gameVar.type = GameVarType::BOOL;
-                gameVar.value.b = game::vars::get<bool>(var);
-            }else if(game::vars::is<std::string>(var)){
-                gameVar.type = GameVarType::STRING;
-                std::strcpy(gameVar.value.s, game::vars::get<std::string>(var).c_str());
-            }
-            output.write(reinterpret_cast<const char*>(&gameVar), sizeof(GameVar));
-        }
+    //     for(auto var: varList){
+    //         GameVar gameVar;
+    //         std::strcpy(gameVar.name, var.c_str());
+    //         if(game::vars::is<long>(var)){
+    //             gameVar.type = GameVarType::LONG;
+    //             gameVar.value.l = game::vars::get<long>(var);
+    //         }else if(game::vars::is<double>(var)){
+    //             gameVar.type = GameVarType::DOUBLE;
+    //             gameVar.value.d = game::vars::get<double>(var);
+    //         }else if(game::vars::is<bool>(var)){
+    //             gameVar.type = GameVarType::BOOL;
+    //             gameVar.value.b = game::vars::get<bool>(var);
+    //         }else if(game::vars::is<std::string>(var)){
+    //             gameVar.type = GameVarType::STRING;
+    //             std::strcpy(gameVar.value.s, game::vars::get<std::string>(var).c_str());
+    //         }
+    //         output.write(reinterpret_cast<const char*>(&gameVar), sizeof(GameVar));
+    //     }
 
-        uint64_t sceneIndex = 0;
-        for(auto it: this->m_scenes){
-            SceneInfo sceneInfo;
+    //     uint64_t sceneIndex = 0;
+    //     for(auto it: this->m_scenes){
+    //         SceneInfo sceneInfo;
 
-            std::strcpy(sceneInfo.sceneName, it.first.c_str());
-            std::strcpy(sceneInfo.worldName, it.second->getWorld().c_str());
-            std::vector<std::string> sceneVarList;
-            sf::Vector2f worldGravity = game::physic::world::getGravity(it.second->getWorld());
+    //         std::strcpy(sceneInfo.sceneName, it.first.c_str());
+    //         std::strcpy(sceneInfo.worldName, it.second->getWorld().c_str());
+    //         std::vector<std::string> sceneVarList;
+    //         sf::Vector2f worldGravity = game::physic::world::getGravity(it.second->getWorld());
 
-            it.second->varList(sceneVarList);
+    //         it.second->varList(sceneVarList);
 
-            sceneInfo.worldGravity[0] = worldGravity.x;
-            sceneInfo.worldGravity[1] = worldGravity.y;
-            sceneInfo.varsCount = sceneVarList.size();
-            sceneInfo.objectsCount = it.second->objects().size();
+    //         sceneInfo.worldGravity[0] = worldGravity.x;
+    //         sceneInfo.worldGravity[1] = worldGravity.y;
+    //         sceneInfo.varsCount = sceneVarList.size();
+    //         sceneInfo.objectsCount = it.second->objects().size();
 
-            output.write(reinterpret_cast<const char*>(&sceneInfo), sizeof(SceneInfo));
+    //         output.write(reinterpret_cast<const char*>(&sceneInfo), sizeof(SceneInfo));
 
-            for(auto var: sceneVarList){
-                GameVar gameVar;
-                std::strcpy(gameVar.name, var.c_str());
-                if(it.second->varIs<long>(var)){
-                    gameVar.type = GameVarType::LONG;
-                    gameVar.value.l = it.second->getVar<long>(var);
-                }else if(it.second->varIs<double>(var)){
-                    gameVar.type = GameVarType::DOUBLE;
-                    gameVar.value.d = it.second->getVar<double>(var);
-                }else if(it.second->varIs<bool>(var)){
-                    gameVar.type = GameVarType::BOOL;
-                    gameVar.value.b = it.second->getVar<bool>(var);
-                }else if(it.second->varIs<std::string>(var)){
-                    gameVar.type = GameVarType::STRING;
-                    std::strcpy(gameVar.value.s, it.second->getVar<std::string>(var).c_str());
-                }else return false;
-                output.write(reinterpret_cast<const char*>(&gameVar), sizeof(GameVar));
-            }
+    //         for(auto var: sceneVarList){
+    //             GameVar gameVar;
+    //             std::strcpy(gameVar.name, var.c_str());
+    //             if(it.second->varIs<long>(var)){
+    //                 gameVar.type = GameVarType::LONG;
+    //                 gameVar.value.l = it.second->getVar<long>(var);
+    //             }else if(it.second->varIs<double>(var)){
+    //                 gameVar.type = GameVarType::DOUBLE;
+    //                 gameVar.value.d = it.second->getVar<double>(var);
+    //             }else if(it.second->varIs<bool>(var)){
+    //                 gameVar.type = GameVarType::BOOL;
+    //                 gameVar.value.b = it.second->getVar<bool>(var);
+    //             }else if(it.second->varIs<std::string>(var)){
+    //                 gameVar.type = GameVarType::STRING;
+    //                 std::strcpy(gameVar.value.s, it.second->getVar<std::string>(var).c_str());
+    //             }else return false;
+    //             output.write(reinterpret_cast<const char*>(&gameVar), sizeof(GameVar));
+    //         }
 
-            for(auto objIt: it.second->objects()){
-                auto object = objIt.second;
+    //         for(auto objIt: it.second->objects()){
+    //             auto object = objIt.second;
 
-                ObjectInfo objectInfo;
-                std::strcpy(objectInfo.currentAnimation, object->getAnimation().c_str());
-                std::strcpy(objectInfo.textureName, object->getTextureName().c_str());
-                objectInfo.animationsCount = object->animations().size();
+    //             ObjectInfo objectInfo;
+    //             std::strcpy(objectInfo.currentAnimation, object->getAnimation().c_str());
+    //             std::strcpy(objectInfo.textureName, object->getTextureName().c_str());
+    //             objectInfo.animationsCount = object->animations().size();
 
-                objectInfo.usePhysics = object->getBodyName().empty() ? false : true;
-                std::strcpy(objectInfo.worldName, object->getWorldName().c_str());
-                std::strcpy(objectInfo.bodyName, object->getBodyName().c_str());
-                // objectInfo.drawable = ;
+    //             objectInfo.usePhysics = object->getBodyName().empty() ? false : true;
+    //             std::strcpy(objectInfo.worldName, object->getWorldName().c_str());
+    //             std::strcpy(objectInfo.bodyName, object->getBodyName().c_str());
+    //             // objectInfo.drawable = ;
 
-                objectInfo.bodyType = game::physic::body::getType(object->getWorldName(), object);
-                objectInfo.bodyDensity = game::physic::body::getDensity(object->getWorldName(), object);
-                objectInfo.bodyFixRotation = game::physic::body::getFixRotation(object->getWorldName(), object);
-                objectInfo.bodyFriction = game::physic::body::getFriction(object->getWorldName(), object);
-                objectInfo.bodyRestitution = game::physic::body::getRestitution(object->getWorldName(), object);
-                sf::Vector2f position = game::physic::body::getPosition(object->getWorldName(), object),
-                             velocity = game::physic::body::getVelocity(object->getWorldName(), object),
-                             size = object->getSize();
-                objectInfo.position[0] = position.x;
-                objectInfo.position[1] = position.y;
-                objectInfo.velocity[0] = velocity.x;
-                objectInfo.velocity[1] = velocity.y;
-                objectInfo.size[0] = size.x;
-                objectInfo.size[1] = size.y;
-                objectInfo.animationDelay = object->getDelay();
+    //             objectInfo.bodyType = game::physic::body::getType(object->getWorldName(), object);
+    //             objectInfo.bodyDensity = game::physic::body::getDensity(object->getWorldName(), object);
+    //             objectInfo.bodyFixRotation = game::physic::body::getFixRotation(object->getWorldName(), object);
+    //             objectInfo.bodyFriction = game::physic::body::getFriction(object->getWorldName(), object);
+    //             objectInfo.bodyRestitution = game::physic::body::getRestitution(object->getWorldName(), object);
+    //             sf::Vector2f position = game::physic::body::getPosition(object->getWorldName(), object),
+    //                          velocity = game::physic::body::getVelocity(object->getWorldName(), object),
+    //                          size = object->getSize();
+    //             objectInfo.position[0] = position.x;
+    //             objectInfo.position[1] = position.y;
+    //             objectInfo.velocity[0] = velocity.x;
+    //             objectInfo.velocity[1] = velocity.y;
+    //             objectInfo.size[0] = size.x;
+    //             objectInfo.size[1] = size.y;
+    //             objectInfo.animationDelay = object->getDelay();
 
-                output.write(reinterpret_cast<const char*>(&objectInfo), sizeof(ObjectInfo));
+    //             output.write(reinterpret_cast<const char*>(&objectInfo), sizeof(ObjectInfo));
 
-                for(auto aniIt: object->animations()){
-                    ObjectAnimation objectAnimation;
+    //             for(auto aniIt: object->animations()){
+    //                 ObjectAnimation objectAnimation;
 
-                    std::strcpy(objectAnimation.name, aniIt.first.c_str());
-                    objectAnimation.rectsCount = aniIt.second.size();
-                    output.write(reinterpret_cast<const char*>(&objectAnimation), sizeof(ObjectAnimation));
+    //                 std::strcpy(objectAnimation.name, aniIt.first.c_str());
+    //                 objectAnimation.rectsCount = aniIt.second.size();
+    //                 output.write(reinterpret_cast<const char*>(&objectAnimation), sizeof(ObjectAnimation));
 
-                    for(auto rect: aniIt.second){
-                        output.write(reinterpret_cast<const char*>(&rect.position.x), sizeof(int));
-                        output.write(reinterpret_cast<const char*>(&rect.position.y), sizeof(int));
-                        output.write(reinterpret_cast<const char*>(&rect.size.x), sizeof(int));
-                        output.write(reinterpret_cast<const char*>(&rect.size.y), sizeof(int));
-                    }
-                }
-            }
-        }
+    //                 for(auto rect: aniIt.second){
+    //                     output.write(reinterpret_cast<const char*>(&rect.position.x), sizeof(int));
+    //                     output.write(reinterpret_cast<const char*>(&rect.position.y), sizeof(int));
+    //                     output.write(reinterpret_cast<const char*>(&rect.size.x), sizeof(int));
+    //                     output.write(reinterpret_cast<const char*>(&rect.size.y), sizeof(int));
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        output.close();
-        sf::Texture tex(window.getSize());
-        tex.update(window);
-        this->updateSlot(tex.copyToImage());
-        return true;
-    }
-    bool Game::loadFromSlot(uint slot){
-        std::string savePath = game::settings::getHomeDir();
-        #ifdef __WIN32
-        savePath.append("/game/");
-        #else
-        savePath.append("/.game/");
-        #endif
+    //     output.close();
+    //     sf::Texture tex(window.getSize());
+    //     tex.update(window);
+    //     this->updateSlot(tex.copyToImage());
+    //     return true;
+    // }
+    // bool Game::loadFromSlot(uint slot){
+    //     std::string savePath = game::settings::getHomeDir();
+    //     #ifdef __WIN32
+    //     savePath.append("/game/");
+    //     #else
+    //     savePath.append("/.game/");
+    //     #endif
 
-        std::filesystem::path dir(savePath);
-        if (!std::filesystem::exists(dir)) {
-            std::filesystem::create_directory(dir);
-        }
-        char fileName[16];
-        sprintf(fileName, "/slot_%.2d.bin", slot);
-        savePath.append(fileName);
+    //     std::filesystem::path dir(savePath);
+    //     if (!std::filesystem::exists(dir)) {
+    //         std::filesystem::create_directory(dir);
+    //     }
+    //     char fileName[16];
+    //     sprintf(fileName, "/slot_%.2d.bin", slot);
+    //     savePath.append(fileName);
 
-        std::ifstream input(savePath);
+    //     std::ifstream input(savePath);
 
-        GameData gameData;
-        input.read(reinterpret_cast<char*>(&gameData), sizeof(GameData));
-        this->m_currentScene = gameData.currentScene;
-        this->m_viewMinPosition = sf::Vector2f(gameData.viewLimits[0], gameData.viewLimits[1]);
-        this->m_viewMaxPosition = sf::Vector2f(gameData.viewLimits[2], gameData.viewLimits[3]);
+    //     GameData gameData;
+    //     input.read(reinterpret_cast<char*>(&gameData), sizeof(GameData));
+    //     this->m_currentScene = gameData.currentScene;
+    //     this->m_viewMinPosition = sf::Vector2f(gameData.viewLimits[0], gameData.viewLimits[1]);
+    //     this->m_viewMaxPosition = sf::Vector2f(gameData.viewLimits[2], gameData.viewLimits[3]);
 
-        while(gameData.globalVarsCount--){
-            GameVar gameVar;
-            input.read(reinterpret_cast<char*>(&gameVar), sizeof(GameVar));
+    //     while(gameData.globalVarsCount--){
+    //         GameVar gameVar;
+    //         input.read(reinterpret_cast<char*>(&gameVar), sizeof(GameVar));
 
-            if(gameVar.type == GameVarType::LONG){
-                game::vars::set<long>(std::string(gameVar.name), gameVar.value.l);
-            }else if(gameVar.type == GameVarType::DOUBLE){
-                game::vars::set<double>(std::string(gameVar.name), gameVar.value.d);
-            }else if(gameVar.type == GameVarType::BOOL){
-                game::vars::set<bool>(std::string(gameVar.name), gameVar.value.b);
-            }else if(gameVar.type == GameVarType::STRING){
-                game::vars::set<std::string>(std::string(gameVar.name), std::string(gameVar.value.s));
-            }else return false;
-        }
+    //         if(gameVar.type == GameVarType::LONG){
+    //             game::vars::set<long>(std::string(gameVar.name), gameVar.value.l);
+    //         }else if(gameVar.type == GameVarType::DOUBLE){
+    //             game::vars::set<double>(std::string(gameVar.name), gameVar.value.d);
+    //         }else if(gameVar.type == GameVarType::BOOL){
+    //             game::vars::set<bool>(std::string(gameVar.name), gameVar.value.b);
+    //         }else if(gameVar.type == GameVarType::STRING){
+    //             game::vars::set<std::string>(std::string(gameVar.name), std::string(gameVar.value.s));
+    //         }else return false;
+    //     }
 
-        while(gameData.scenesCount--){
-            SceneInfo sceneInfo;
-            input.read(reinterpret_cast<char*>(&sceneInfo), sizeof(SceneInfo));
+    //     while(gameData.scenesCount--){
+    //         SceneInfo sceneInfo;
+    //         input.read(reinterpret_cast<char*>(&sceneInfo), sizeof(SceneInfo));
 
-            if(!game::physic::world::exists(sceneInfo.worldName)){
-                game::physic::world::create(sceneInfo.worldGravity[0], sceneInfo.worldGravity[1], sceneInfo.worldName);
-            }
+    //         if(!game::physic::world::exists(sceneInfo.worldName)){
+    //             game::physic::world::create(sceneInfo.worldGravity[0], sceneInfo.worldGravity[1], sceneInfo.worldName);
+    //         }
 
-            auto scene = this->addScene(std::string(sceneInfo.sceneName), Scene::create(sceneInfo.worldName));
-            while(sceneInfo.varsCount--){
-                GameVar gameVar;
-                input.read(reinterpret_cast<char*>(&gameVar), sizeof(GameVar));
-                if(gameVar.type == GameVarType::LONG){
-                    scene->setVar<long>(std::string(gameVar.name), gameVar.value.l);
-                }else if(gameVar.type == GameVarType::DOUBLE){
-                    scene->setVar<double>(std::string(gameVar.name), gameVar.value.d);
-                }else if(gameVar.type == GameVarType::BOOL){
-                    scene->setVar<bool>(std::string(gameVar.name), gameVar.value.b);
-                }else if(gameVar.type == GameVarType::STRING){
-                    scene->setVar<std::string>(std::string(gameVar.name), std::string(gameVar.value.s));
-                }else return false;
-            }
+    //         auto scene = this->addScene(std::string(sceneInfo.sceneName), Scene::create(sceneInfo.worldName));
+    //         while(sceneInfo.varsCount--){
+    //             GameVar gameVar;
+    //             input.read(reinterpret_cast<char*>(&gameVar), sizeof(GameVar));
+    //             if(gameVar.type == GameVarType::LONG){
+    //                 scene->setVar<long>(std::string(gameVar.name), gameVar.value.l);
+    //             }else if(gameVar.type == GameVarType::DOUBLE){
+    //                 scene->setVar<double>(std::string(gameVar.name), gameVar.value.d);
+    //             }else if(gameVar.type == GameVarType::BOOL){
+    //                 scene->setVar<bool>(std::string(gameVar.name), gameVar.value.b);
+    //             }else if(gameVar.type == GameVarType::STRING){
+    //                 scene->setVar<std::string>(std::string(gameVar.name), std::string(gameVar.value.s));
+    //             }else return false;
+    //         }
 
-            while(sceneInfo.objectsCount--){
-                ObjectInfo objectInfo;
-                input.read(reinterpret_cast<char*>(&objectInfo), sizeof(ObjectInfo));
+    //         while(sceneInfo.objectsCount--){
+    //             ObjectInfo objectInfo;
+    //             input.read(reinterpret_cast<char*>(&objectInfo), sizeof(ObjectInfo));
 
-                auto object = scene->createObject(
-                    std::string(objectInfo.textureName),
-                    objectInfo.bodyName,
-                    {objectInfo.position[0], objectInfo.position[1]},
-                    {objectInfo.size[0], objectInfo.size[1]},
-                    game::physic::body::ShapeType::RECTANGLE, // TODO: save bodyType to slots
-                    (b2BodyType)objectInfo.bodyType
-                );
-                object->setDelay(objectInfo.animationDelay);
+    //             auto object = scene->createObject(
+    //                 std::string(objectInfo.textureName),
+    //                 objectInfo.bodyName,
+    //                 {objectInfo.position[0], objectInfo.position[1]},
+    //                 {objectInfo.size[0], objectInfo.size[1]},
+    //                 game::physic::body::ShapeType::RECTANGLE, // TODO: save bodyType to slots
+    //                 (b2BodyType)objectInfo.bodyType
+    //             );
+    //             object->setDelay(objectInfo.animationDelay);
 
-                if(objectInfo.usePhysics){
-                    sf::Vector2f position = sf::Vector2f(objectInfo.position[0], objectInfo.position[1]);
-                    sf::Vector2f velocity = sf::Vector2f(objectInfo.velocity[0], objectInfo.velocity[1]);
-                    sf::Vector2f size = sf::Vector2f(objectInfo.size[0], objectInfo.size[1]);
-                    game::physic::body::setDensity(objectInfo.worldName, object, objectInfo.bodyDensity);
-                    game::physic::body::setFriction(objectInfo.worldName, object, objectInfo.bodyFriction);
-                    game::physic::body::setRestitution(objectInfo.worldName, object, objectInfo.bodyRestitution);
-                    game::physic::body::setFixRotation(objectInfo.worldName, object, objectInfo.bodyFixRotation);
-                }
+    //             if(objectInfo.usePhysics){
+    //                 sf::Vector2f position = sf::Vector2f(objectInfo.position[0], objectInfo.position[1]);
+    //                 sf::Vector2f velocity = sf::Vector2f(objectInfo.velocity[0], objectInfo.velocity[1]);
+    //                 sf::Vector2f size = sf::Vector2f(objectInfo.size[0], objectInfo.size[1]);
+    //                 game::physic::body::setDensity(objectInfo.worldName, object, objectInfo.bodyDensity);
+    //                 game::physic::body::setFriction(objectInfo.worldName, object, objectInfo.bodyFriction);
+    //                 game::physic::body::setRestitution(objectInfo.worldName, object, objectInfo.bodyRestitution);
+    //                 game::physic::body::setFixRotation(objectInfo.worldName, object, objectInfo.bodyFixRotation);
+    //             }
 
-                while(objectInfo.animationsCount--){
-                    ObjectAnimation animation;
-                    input.read(reinterpret_cast<char*>(&animation), sizeof(ObjectAnimation));
+    //             while(objectInfo.animationsCount--){
+    //                 ObjectAnimation animation;
+    //                 input.read(reinterpret_cast<char*>(&animation), sizeof(ObjectAnimation));
 
-                    while(animation.rectsCount--){
-                        int intVec[4];
-                        input.read(reinterpret_cast<char*>(intVec), sizeof(int)*4);
-                        object->addAnimation(animation.name, sf::IntRect({intVec[0],intVec[1]}, {intVec[2],intVec[3]}));
-                    }
-                }
-                object->setAnimation(objectInfo.currentAnimation);
-            }
-        }
+    //                 while(animation.rectsCount--){
+    //                     int intVec[4];
+    //                     input.read(reinterpret_cast<char*>(intVec), sizeof(int)*4);
+    //                     object->addAnimation(animation.name, sf::IntRect({intVec[0],intVec[1]}, {intVec[2],intVec[3]}));
+    //                 }
+    //             }
+    //             object->setAnimation(objectInfo.currentAnimation);
+    //         }
+    //     }
 
-        this->m_currentSlotInfo = slot;
-        return true;
-    }
+    //     this->m_currentSlotInfo = slot;
+    //     return true;
+    // }
 
     bool Game::loadSceneFromFile(std::string filePath){
         // YAML::Node root = YAML::LoadFile(filePath);
