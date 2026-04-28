@@ -128,11 +128,11 @@ namespace game {
         this->m_objects[name] = object;
         return true;
     }
-    game::Object::Ptr Scene::createObject(std::string name, sf::Vector2f pos, sf::Vector2f size, game::physic::body::ShapeType shape, b2BodyType type){
+    game::Object::Ptr Scene::createObject(std::string name, sf::Vector2f pos, sf::Vector2f size, game::physic::body::ShapeType shape, b2BodyType type, std::vector<std::pair<std::string, sf::FloatRect>> sensors){
         game::Object::Ptr newObject = game::Object::create();
 
         if(game::physic::world::exists(this->m_world)){
-            game::physic::body::create(this->m_world, name, newObject, pos, type);
+            game::physic::body::create(this->m_world, name, newObject, pos, type, true, static_cast<void*>(newObject.get()));
             switch(shape){
                 case game::physic::body::ShapeType::CIRCLE:
                     game::physic::body::createShapeCircle(this->m_world, name, {0, 0}, (size.x+size.y)/2.0f);
@@ -150,11 +150,18 @@ namespace game {
 
                     break;
                 case game::physic::body::ShapeType::SEGMENT:
-                    game::physic::body::createShapeSegment(this->m_world, name, {-size.x/2.0f, -size.y/2.0f}, {size.x/2.0f, size.y/2.0f});
+                    game::physic::body::createShapeSegment(this->m_world, name, {size.x, size.y}, {size.x/2.0f, size.y/2.0f});
 
                     break;
                 default:
                     break;
+            }
+
+            for(auto [sensor, rect]: sensors){
+                std::cout << sensor << ' ' << std::endl;
+                std::cout << rect.size.x << ' ' << rect.size.y << std::endl;
+                // game::physic::body::createShapeRectangle(this->m_world, name, {10,10}, 0.0, 0.0, {0,32}, 0.0, 0.0, 0.0,true);
+                game::physic::body::createShapeRectangle(this->m_world, name, rect.size, 0.0, 0.0, rect.position, 0.0, 0.0, 0.0,true);
             }
         }
         this->addObject(newObject, name);
@@ -177,6 +184,7 @@ namespace game {
         this->m_layers[layerID][pos.x].erase(pos.y);
     }
     void Scene::addCollisionArea(std::string name, sf::FloatRect rect, float friction){
+        // TODO: Add suport to many areas by body
         if(this->m_collisionArea.contains(name)) return;
 
         rect.position.x = rect.position.x*this->m_grid.x + (rect.size.x/2.0);

@@ -1,26 +1,11 @@
 #include <SFML/Graphics.hpp>
 
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/RenderStates.hpp>
-#include <SFML/Graphics/Shader.hpp>
-#include <SFML/Graphics/Shape.hpp>
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Keyboard.hpp>
-#include <SFML/Window/Mouse.hpp>
-#include <SFML/Window/WindowEnums.hpp>
 #include <cmath>
 #include <physic.hpp>
 #include <resource.hpp>
 #include <object.hpp>
 #include <scene.hpp>
 #include <settings.hpp>
-#include <box2d/box2d.h>
-#include <box2d/id.h>
-#include <box2d/math_functions.h>
-#include <box2d/types.h>
-#include <time.h>
 #include <splash.hpp>
 #include <game.hpp>
 #include <vars.hpp>
@@ -29,7 +14,7 @@
 #include <utils.hpp>
 #include <settings.hpp>
 #include <vars.hpp>
-#include "animation.hpp"
+#include <box2d/types.h>
 #include <imgui/imgui.h>
 #include <imgui-SFML.h>
 
@@ -106,7 +91,7 @@ int main(){
         // waterMirrorSprite.setPosition(sf::Vector2f(0, WINDOW_HEIGHT));
         // waterMirrorSprite.setColor(sf::Color(0xffffff50));
 
-        auto [shaderKey, shader] = game::resource::shader::get("simple:grid");
+        auto [shaderKey, shader] = game::resource::shader::get("test:simple");
         sf::RectangleShape shape;
         shape.setSize({1368,768});
         shape.setPosition({0,0});
@@ -156,6 +141,8 @@ int main(){
                         auto bodyId = game::physic::body::get("default", "Player");
                         game::Object* player = (game::Object*) b2Body_GetUserData(bodyId);
                         float force = -460.0f;
+                        // player->createSensor("PlayerJumpSensor", {14, 2}, {0, 32});
+
                         // b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, force*17}, true);
                         player->jump();
                         // std::cout << mass << ' ' << mass*150 << std::endl;
@@ -176,8 +163,8 @@ int main(){
 
             window.clear(sf::Color(0x123456ff));
             game::physic::world::eventHit();
-            game::physic::world::eventBeginTouch();
-            game::physic::world::eventEndTouch();
+            game::physic::world::eventSensor();
+            game::physic::world::eventTouch();
 
             shader->setUniform("u_resolution", sf::Vector2f{1368.,768.});
             shader->setUniform("u_time", clock.getElapsedTime().asSeconds());
@@ -237,7 +224,7 @@ int main(){
             }
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)){
                 // b2Body_ApplyForceToCenter(game::physic::body::get("default", "Player"), {0.0f, -1200.0f}, true);
-                // float mass = b2Body_GetMass(bodyId);
+                float mass = b2Body_GetMass(bodyId);
                 // std::cout << mass << std::endl;
             }
 
@@ -265,9 +252,14 @@ void createLevel(game::Game::Ptr game){
     // auto collision = scene->createObject("ground", "ground", sf::Vector2f(WINDOW_WIDTH/2.0, (32*3)/2.0), sf::Vector2f(20*32, 32*3));
     // collision->sprite().setTextureRect(sf::IntRect({0,0}, {0,0}));
 
-    auto object = scene->createObject("Player", {1368/2.0, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    std::vector<std::pair<std::string, sf::FloatRect>> sensors;
+    // sensors.push_back({"JumpSensor", {{0,32},{14,2}}});
+
+    auto object = scene->createObject("Player", {1368/2.0, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody, sensors);
     // auto object2 = scene->createObject("Player1", {1368/2.0-72, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+
     auto object3 = scene->createObject("Player2", {1368/2.0+72, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::RECTANGLE, b2_dynamicBody);
+    // auto object3 = scene->createObject("Player2", {1368/2.0+72, 170}, sf::Vector2f(32, 64), game::physic::body::ShapeType::SEGMENT, b2_dynamicBody);
     object->setDrawable(true);
     // object2->setDrawable(false);
     object3->setDrawable(false);
@@ -284,6 +276,17 @@ void createLevel(game::Game::Ptr game){
     animation->addFrame(sf::IntRect({0*32,1*32},{32,32}));
     animation->addFrame(sf::IntRect({1*32,1*32},{32,32}));
     animation->addFrame(sf::IntRect({2*32,1*32},{32,32}));
+
+    object->createSensor("LeftGrabSensor", {2, 2}, {-16, -32}, game::physic::world::SensorType::NO_SENSOR);
+    object->createSensor("RightGrabSensor", {2, 2}, {16, -32}, game::physic::world::SensorType::NO_SENSOR);
+    object->createSensor("JumpSensor", {14, 2}, {0, 32}, game::physic::world::SensorType::GROUNDED_SENSOR);
+    // auto shapeId = game::physic::body::createShapeRectangle("default", "Player", {14, 2}, 0.0, 0.0, {0,32}, 0.01, 0.3, 0.0, true);
+    // game::physic::body::setFilterMask("default", "Player", game::physic::body::ObjectFilterType::GROUND);
+    // b2Shape_SetUserData(shapeId, (void*) game::physic::world::SensorType::GROUNDED_SENSOR);
+
+    // game::physic::body::create("default", "Player", nullptr, {1368/2.0+64, 470}, b2_staticBody, true);
+    // game::physic::body::createShapeRectangle("default", "Player", {14,2}, 0.0, 0.0, {0.0, 32.0}, 0.0, 0.0, 0.0, true);
+    // game::physic::body::setFilterCategory("default", "Player", game::physic::body::ObjectFilterType::GROUND);
 
     // game::physic::body::setFriction("default", "Player", 60);
     // animation->addFrame(sf::IntRect({0*32,0*32},{32,32}));
@@ -307,7 +310,7 @@ void createLevel(game::Game::Ptr game){
 
     // scene->addCollisionArea("Platform", {{0,1},{32,32}});
     scene->addCollisionArea("Ground", {{1,15},{32*41,32*3}});
-    scene->addCollisionArea("Wall", {{15,11},{32*4,32*4}}, 0.1);
+    scene->addCollisionArea("Wall", {{15,12},{32*4,32*3}}, 0.1);
     scene->addCollisionArea("Ground2", {{39,14},{32,32}});
     for(int i=0; i<15; i++){
         scene->addSprite(game::scene::Layer::FAR_FOREGROUND, "ground", sf::IntRect({{32*4,32*3}, {32,32}}), {0, (float)i});

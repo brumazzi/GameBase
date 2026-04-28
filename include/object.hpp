@@ -2,13 +2,10 @@
 #define __OBJECT_HPP__
 
 #include <SFML/Graphics.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <map>
 #include <unordered_map>
-#include <vector>
 #include <memory>
 #include <animation.hpp>
+#include <physic.hpp>
 
 namespace game{
     class Object: public std::enable_shared_from_this<Object>{
@@ -47,6 +44,13 @@ namespace game{
         void setAnimation(std::string key);
         std::pair<std::string, game::Animation::Ptr> getAnimation();
 
+        void createSensor(std::string sensorName, sf::Vector2f size, sf::Vector2f offset, game::physic::world::SensorType type);
+        void unlinkSensor(std::string sensorName);
+        void linkSensor(std::string sensorName, sf::Vector2f offset);
+        void setSensorOffset(std::string sensorName, sf::Vector2f offset);
+        void enabledSensor(std::string sensorName, bool flag);
+        sf::FloatRect getSensorRect(std::string sensorName);
+
         void setDrawable(bool drawable);
         // void setDelay(uint16_t delay);
         void setBodyName(std::string bodyName);
@@ -78,6 +82,7 @@ namespace game{
         std::pair<std::string, game::Animation::Ptr> m_animation;
         std::unordered_map<std::string, game::Object::Event> m_callbacks;
         std::unordered_map<std::string, game::Animation::Ptr> m_animations;
+        std::unordered_map<std::string, sf::FloatRect> m_sensors;
         bool m_destroyed;
         bool m_drawable;
         bool m_grounded;

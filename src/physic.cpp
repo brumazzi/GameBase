@@ -1,18 +1,11 @@
 #include <box2d/box2d.h>
-#include <box2d/collision.h>
-#include <box2d/id.h>
-#include <box2d/math_functions.h>
-#include <box2d/types.h>
-#include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Color.hpp>
-#include <SFML/Graphics/PrimitiveType.hpp>
-#include <SFML/Graphics/VertexArray.hpp>
-#include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics.hpp>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <physic.hpp>
 #include <object.hpp>
+#include <string>
 
 #include <map>
 
@@ -116,10 +109,10 @@ namespace game{
                     b2World_Step(worldMap[world].id, UPDATE_TIME, 4);
                 }
             }
-            void eventBeginTouch(std::string world){
-                b2ContactEvents contact = b2World_GetContactEvents(worldMap[world].id);
-                for(int i=0; i<contact.beginCount; i++){
-                    b2ContactBeginTouchEvent& beginEvent = contact.beginEvents[i];
+            void eventTouch(std::string world){
+                b2ContactEvents contactEvent = b2World_GetContactEvents(worldMap[world].id);
+                for(int i=0; i<contactEvent.beginCount; i++){
+                    b2ContactBeginTouchEvent& beginEvent = contactEvent.beginEvents[i];
                     // game::Object* A = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(beginEvent.shapeIdA));
                     // game::Object* B = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(beginEvent.shapeIdB));
 
@@ -129,11 +122,8 @@ namespace game{
                     // if(B) std::cout << "B: " << B->getBodyName() << std::endl;
                     // else std::cout << "B: " << "Static" << std::endl;
                 }
-            }
-            void eventEndTouch(std::string world){
-                b2ContactEvents contact = b2World_GetContactEvents(worldMap[world].id);
-                for(int i=0; i<contact.endCount; i++){
-                    b2ContactEndTouchEvent& endEvent = contact.endEvents[i];
+                for(int i=0; i<contactEvent.endCount; i++){
+                    b2ContactEndTouchEvent& endEvent = contactEvent.endEvents[i];
                     // game::Object* A = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(endEvent.shapeIdA));
                     // game::Object* B = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(endEvent.shapeIdB));
 
@@ -142,23 +132,56 @@ namespace game{
                     // else std::cout << "A: " << "Static" << std::endl;
                     // if(B) std::cout << "B: " << B->getBodyName() << std::endl;
                     // else std::cout << "B: " << "Static" << std::endl;
-
-                    // std::cout << endEvent.contactId.
                 }
             }
+            void eventSensor(std::string world){
+                b2SensorEvents sensorEvent = b2World_GetSensorEvents(worldMap[world].id);
+
+                for(int i=0; i<sensorEvent.beginCount; i++){
+                    puts("BEGIN SENSOR EVENT");
+                    b2SensorBeginTouchEvent& beginSensorEvent = sensorEvent.beginEvents[i];
+
+                    void *data = b2Shape_GetUserData(beginSensorEvent.sensorShapeId);
+                    SensorType sensorType = *((SensorType*) &data) ;
+                    // void* VisitorData = b2Shape_GetUserData(beginSensorEvent.visitorShapeId);
+
+                    if(sensorType == SensorType::GROUNDED_SENSOR){
+                        b2BodyId bodyId = b2Shape_GetBody(beginSensorEvent.sensorShapeId);
+                        game::Object* object = (game::Object*) b2Body_GetUserData(bodyId);
+                        std::cout << object << std::endl;
+                        if(object) object->setGrounded(true);
+                    }
+                }
+
+                for(int i=0; i<sensorEvent.endCount; i++){
+                    puts("END SENSOR EVENT");
+                    b2SensorEndTouchEvent& endSensorEvent = sensorEvent.endEvents[i];
+
+                    void *data = b2Shape_GetUserData(endSensorEvent.sensorShapeId);
+                    SensorType sensorType = *((SensorType*) &data) ;
+                    // void* VisitorData = b2Shape_GetUserData(endSensorEvent.visitorShapeId);
+
+                    if(sensorType == SensorType::GROUNDED_SENSOR){
+                        b2BodyId bodyId = b2Shape_GetBody(endSensorEvent.sensorShapeId);
+                        game::Object* object = (game::Object*) b2Body_GetUserData(bodyId);
+                        if(object) object->setGrounded(false);
+                    }
+                }
+            }
+
             /* This function is used to detect collision with high speed between 2 shapes */
             void eventHit(std::string world){
-                b2ContactEvents contact = b2World_GetContactEvents(worldMap[world].id);
-                for(int i=0; i<contact.hitCount; i++){
-                    b2ContactHitEvent& hitEvent = contact.hitEvents[i];
+                b2ContactEvents contactEvent = b2World_GetContactEvents(worldMap[world].id);
+                for(int i=0; i<contactEvent.hitCount; i++){
+                    b2ContactHitEvent& hitEvent = contactEvent.hitEvents[i];
 
                     game::Object* A = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(hitEvent.shapeIdA));
                     game::Object* B = (game::Object*) b2Body_GetUserData(b2Shape_GetBody(hitEvent.shapeIdB));
                     std::cout << "###### Start Hit ######" << std::endl;
-                    if(A) std::cout << "A: " << A->getBodyName() << std::endl;
-                    else std::cout << "A: " << "Ground" << std::endl;
-                    if(B) std::cout << "B: " << B->getBodyName() << std::endl;
-                    else std::cout << "B: " << "Ground" << std::endl;
+                    // if(A) std::cout << "A: " << A->getBodyName() << std::endl;
+                    // else std::cout << "A: " << "Ground" << std::endl;
+                    // if(B) std::cout << "B: " << B->getBodyName() << std::endl;
+                    // else std::cout << "B: " << "Ground" << std::endl;
                     std::cout << hitEvent.normal.x << ' ' << hitEvent.normal.y << std::endl;
 
                     std::cout << hitEvent.approachSpeed << "\n";
@@ -170,19 +193,13 @@ namespace game{
                     if(hitEvent.approachSpeed > 15.9 && hitEvent.normal.x != 0.0){
                         std::cout << "Friction" << std::endl;
                         if(!A != !B){
+                            puts("OK");
                             game::Object* object;
                             if(A) object = A;
                             else if(B) object = B;
                             if(!object->isGrounded()) object->setFriction(60);
-                            // game::physic::body::setFriction(object->shared_from_this(), 60);
                         }
                     }
-                    if(hitEvent.normal.y < 0.0f){
-                        if(B) B->setGrounded(true);
-                    }else if(hitEvent.normal.y > 0.0f){
-                        if(A) A->setGrounded(true);
-                    }
-
                     // if(hitEvent.normal.y)
                 }
             }
@@ -202,6 +219,12 @@ namespace game{
 
                     for(ulong i=0; i<shapeCount; i++){
                         b2ShapeType shapeType = b2Shape_GetType(shapes[i]);
+                        bool sensor = b2Shape_IsSensor(shapes[i]);
+
+                        sf::Color color(sf::Color::White);
+                        if(sensor){
+                            color = sf::Color::Green;
+                        }
 
                         if(shapeType == b2_capsuleShape){
                             b2Capsule capsule = b2Shape_GetCapsule(shapes[i]);
@@ -216,8 +239,8 @@ namespace game{
                             sfCircle2.setFillColor(sf::Color(0x00000000));
                             sfCircle1.setOutlineThickness(1);
                             sfCircle2.setOutlineThickness(1);
-                            sfCircle1.setOutlineColor(sf::Color(0xffffffff));
-                            sfCircle2.setOutlineColor(sf::Color(0xffffffff));
+                            sfCircle1.setOutlineColor(sf::Color(color));
+                            sfCircle2.setOutlineColor(sf::Color(color));
 
                             render.draw(sfCircle1);
                             render.draw(sfCircle2);
@@ -229,7 +252,7 @@ namespace game{
                             sfCircle.setPosition({position.x, position.y});
                             sfCircle.setFillColor(sf::Color(0x00000000));
                             sfCircle.setOutlineThickness(1);
-                            sfCircle.setOutlineColor(sf::Color(0xffffffff));
+                            sfCircle.setOutlineColor(sf::Color(color));
 
                             render.draw(sfCircle);
                         }else if(shapeType == b2_polygonShape){
@@ -241,13 +264,13 @@ namespace game{
                                     position.x+poligon.vertices[j].x,
                                     position.y+poligon.vertices[j].y
                                 );
-                                lines[j].color = sf::Color::White;
+                                lines[j].color = color;
                             }
                             lines[poligon.count].position = sf::Vector2f(
                                 position.x+poligon.vertices[0].x,
                                 position.y+poligon.vertices[0].y
                             );
-                            lines[poligon.count].color = sf::Color::White;
+                            lines[poligon.count].color = color;
 
 
                             render.draw(lines);
@@ -256,10 +279,13 @@ namespace game{
                             sf::VertexArray lines(sf::PrimitiveType::Lines, 2);
 
                             lines[0].position = sf::Vector2f({segment.point1.x/2.0f, segment.point1.y/2.0f});
-                            lines[0].color = sf::Color::White;
+                            lines[0].color = color;
                             lines[1].position = sf::Vector2f({segment.point2.x/2.0f, segment.point2.y/2.0f});
-                            lines[1].color = sf::Color::White;
+                            lines[1].color = color;
                             render.draw(lines);
+                            // puts("SEGMENT");
+                            // std::cout << '@' << segment.point1.x << ' ' << segment.point1.y << std::endl;
+                            // std::cout << '#' << segment.point2.x << ' ' << segment.point2.y << std::endl;
                         }
                     }
                 }
@@ -271,7 +297,7 @@ namespace game{
             }
         }
         namespace body{
-            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, b2BodyType type, bool fixRotation){
+            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, b2BodyType type, bool fixRotation, void* data){
                 if(!bodyMap[world].contains(bodyName)){
                     if(object){
                         object->setBodyName(bodyName);
@@ -284,13 +310,14 @@ namespace game{
                     bodyMap[world][bodyName].def.motionLocks.angularZ = fixRotation;
 
                     bodyMap[world][bodyName].id = b2CreateBody(worldMap[world].id, &bodyMap[world][bodyName].def);
-                    if(object) b2Body_SetUserData(bodyMap[world][bodyName].id, static_cast<void*>(object));
+                    if(object) b2Body_SetUserData(bodyMap[world][bodyName].id, object);
+                    else b2Body_SetUserData(bodyMap[world][bodyName].id, data);
                 }
 
                 return bodyMap[world][bodyName].id;
             }
 
-            b2ShapeId createShapeCircle(std::string world, std::string bodyName, sf::Vector2f center, float radius, float density, float friction, float restitution){
+            b2ShapeId createShapeCircle(std::string world, std::string bodyName, sf::Vector2f center, float radius, float density, float friction, float restitution, bool sensor){
                 b2BodyId bodyId = bodyMap[world][bodyName].id;
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 game::Object* object;
@@ -302,8 +329,13 @@ namespace game{
                     shapeDef.filter.maskBits = ObjectFilterTypeMask::SCENE_OBJECT_MASK;
                 }
 
+                if(sensor){
+                    shapeDef.filter.categoryBits = ObjectFilterType::SENSOR;
+                    shapeDef.filter.maskBits = ObjectFilterTypeMask::SENSOR_MASK;
+                }
                 b2Circle circle = {{center.x, center.y}, radius};
 
+                shapeDef.isSensor = sensor;
                 b2ShapeId shapeId = b2CreateCircleShape(bodyId, &shapeDef, &circle);
                 b2Shape_SetFriction(shapeId, friction);
                 b2Shape_SetRestitution(shapeId, restitution);
@@ -311,12 +343,12 @@ namespace game{
                 b2Shape_EnableContactEvents(shapeId, (object != nullptr));
                 b2Shape_EnableHitEvents(shapeId, (object != nullptr));
                 b2Shape_EnablePreSolveEvents(shapeId, (object != nullptr));
-                // b2Shape_EnableSensorEvents(shapeId, (object != nullptr));
+                b2Shape_EnableSensorEvents(shapeId, true);
 
                 b2Body_SetSleepThreshold(bodyMap[world][bodyName].id, 0.0); // Make object always waked
                 return shapeId;
             }
-            b2ShapeId createShapeCapsule(std::string world, std::string bodyName, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution){
+            b2ShapeId createShapeCapsule(std::string world, std::string bodyName, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution, bool sensor){
                 b2BodyId bodyId = bodyMap[world][bodyName].id;
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 game::Object* object;
@@ -328,8 +360,13 @@ namespace game{
                     shapeDef.filter.maskBits = ObjectFilterTypeMask::SCENE_OBJECT_MASK;
                 }
 
+                if(sensor){
+                    shapeDef.filter.categoryBits = ObjectFilterType::SENSOR;
+                    shapeDef.filter.maskBits = ObjectFilterTypeMask::SENSOR_MASK;
+                }
                 b2Capsule capsule = {{center1.x, center1.y}, {center2.x, center2.y}, radius};
 
+                shapeDef.isSensor = sensor;
                 b2ShapeId shapeId = b2CreateCapsuleShape(bodyId, &shapeDef,&capsule);
                 b2Shape_SetFriction(shapeId, friction);
                 b2Shape_SetRestitution(shapeId, restitution);
@@ -337,12 +374,12 @@ namespace game{
                 b2Shape_EnableContactEvents(shapeId, (object != nullptr));
                 b2Shape_EnableHitEvents(shapeId, (object != nullptr));
                 b2Shape_EnablePreSolveEvents(shapeId, (object != nullptr));
-                // b2Shape_EnableSensorEvents(shapeId, (object != nullptr));
+                b2Shape_EnableSensorEvents(shapeId, true);
 
                 b2Body_SetSleepThreshold(bodyMap[world][bodyName].id, 0.0); // Make object always waked
                 return shapeId;
             }
-            b2ShapeId createShapePolygon(std::string world, std::string bodyName, std::vector<b2Vec2> points, float rounded, sf::Vector2f offset, float density, float friction, float restitution){
+            b2ShapeId createShapePolygon(std::string world, std::string bodyName, std::vector<b2Vec2> points, float rounded, sf::Vector2f offset, float density, float friction, float restitution, bool sensor){
                 b2BodyId bodyId = bodyMap[world][bodyName].id;
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 game::Object* object;
@@ -354,10 +391,15 @@ namespace game{
                     shapeDef.filter.maskBits = ObjectFilterTypeMask::SCENE_OBJECT_MASK;
                 }
 
+                if(sensor){
+                    shapeDef.filter.categoryBits = ObjectFilterType::SENSOR;
+                    shapeDef.filter.maskBits = ObjectFilterTypeMask::SENSOR_MASK;
+                }
                 b2Rot rot = b2MakeRot(0);
                 b2Hull hull = b2ComputeHull(points.data(), points.size());
                 b2Polygon polygon = b2MakeOffsetRoundedPolygon(&hull, (b2Vec2){offset.x, offset.y}, rot, rounded);
 
+                shapeDef.isSensor = sensor;
                 b2ShapeId shapeId = b2CreatePolygonShape(bodyId, &shapeDef, &polygon);
                 b2Shape_SetRestitution(shapeId, restitution);
                 b2Shape_SetDensity(shapeId, density, true);
@@ -365,12 +407,12 @@ namespace game{
                 b2Shape_EnableContactEvents(shapeId, (object != nullptr));
                 b2Shape_EnableHitEvents(shapeId, (object != nullptr));
                 b2Shape_EnablePreSolveEvents(shapeId, (object != nullptr));
-                // b2Shape_EnableSensorEvents(shapeId, (object != nullptr));
+                b2Shape_EnableSensorEvents(shapeId, true);
 
                 b2Body_SetSleepThreshold(bodyMap[world][bodyName].id, 0.0); // Make object always waked
                 return shapeId;
             }
-            b2ShapeId createShapeRectangle(std::string world, std::string bodyName, sf::Vector2f size, float rounded, float rotationDeg, sf::Vector2f offset, float density, float friction, float restitution){
+            b2ShapeId createShapeRectangle(std::string world, std::string bodyName, sf::Vector2f size, float rounded, float rotationDeg, sf::Vector2f offset, float density, float friction, float restitution, bool sensor){
                 b2BodyId bodyId = bodyMap[world][bodyName].id;
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 game::Object* object;
@@ -382,8 +424,13 @@ namespace game{
                     shapeDef.filter.maskBits = ObjectFilterTypeMask::SCENE_OBJECT_MASK;
                 }
 
+                if(sensor){
+                    shapeDef.filter.categoryBits = ObjectFilterType::SENSOR;
+                    shapeDef.filter.maskBits = ObjectFilterTypeMask::SENSOR_MASK;
+                }
                 b2Rot rot = b2MakeRot(rotationDeg * (B2_PI / 180.0f));
-                b2Polygon polygon = b2MakeOffsetRoundedBox(size.x, size.y, {offset.x, offset.y}, rot, rounded);
+
+                shapeDef.isSensor = sensor;b2Polygon polygon = b2MakeOffsetRoundedBox(size.x, size.y, {offset.x, offset.y}, rot, rounded);
                 b2ShapeId shapeId = b2CreatePolygonShape(bodyId, &shapeDef, &polygon);
                 b2Shape_SetRestitution(shapeId, restitution);
                 b2Shape_SetDensity(shapeId, density, true);
@@ -391,13 +438,13 @@ namespace game{
                 b2Shape_EnableContactEvents(shapeId, (object != nullptr));
                 b2Shape_EnableHitEvents(shapeId, (object != nullptr));
                 b2Shape_EnablePreSolveEvents(shapeId, (object != nullptr));
-                // b2Shape_EnableSensorEvents(shapeId, (object != nullptr));
+                b2Shape_EnableSensorEvents(shapeId, true);
 
                 b2Body_SetSleepThreshold(bodyMap[world][bodyName].id, 0.0); // Make object always waked
                 return shapeId;
             }
 
-            b2ShapeId createShapeSegment(std::string world, std::string bodyName, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution){
+            b2ShapeId createShapeSegment(std::string world, std::string bodyName, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution, bool sensor){
                 b2BodyId bodyId = bodyMap[world][bodyName].id;
                 b2ShapeDef shapeDef = b2DefaultShapeDef();
                 game::Object* object;
@@ -409,7 +456,12 @@ namespace game{
                     shapeDef.filter.maskBits = ObjectFilterTypeMask::SCENE_OBJECT_MASK;
                 }
 
-                b2Segment segment = {{point1.x, point1.y}, {point2.x, point2.y}};
+                if(sensor){
+                    shapeDef.filter.categoryBits = ObjectFilterType::SENSOR;
+                    shapeDef.filter.maskBits = ObjectFilterTypeMask::SENSOR_MASK;
+                }
+
+                shapeDef.isSensor = sensor;b2Segment segment = {{point1.x, point1.y}, {point2.x, point2.y}};
                 b2ShapeId shapeId = b2CreateSegmentShape(bodyId, &shapeDef, &segment);
                 b2Shape_SetRestitution(shapeId, restitution);
                 b2Shape_SetDensity(shapeId, density, true);
@@ -417,26 +469,26 @@ namespace game{
                 b2Shape_EnableContactEvents(shapeId, (object != nullptr));
                 b2Shape_EnableHitEvents(shapeId, (object != nullptr));
                 b2Shape_EnablePreSolveEvents(shapeId, (object != nullptr));
-                // b2Shape_EnableSensorEvents(shapeId, (object != nullptr));
+                b2Shape_EnableSensorEvents(shapeId, true);
 
                 b2Body_SetSleepThreshold(bodyMap[world][bodyName].id, 0.0); // Make object always waked
                 return shapeId;
             }
 
-            b2ShapeId createShapeCircle(game::Object* object, sf::Vector2f center, float radius, float density, float friction, float restitution){
-                return createShapeCircle(object->getWorldName(), object->getBodyName(), center, radius, density, friction, restitution);
+            b2ShapeId createShapeCircle(game::Object* object, sf::Vector2f center, float radius, float density, float friction, float restitution, bool sensor){
+                return createShapeCircle(object->getWorldName(), object->getBodyName(), center, radius, density, friction, restitution, sensor);
             }
-            b2ShapeId createShapeCapsule(game::Object* object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution){
-                return createShapeCapsule(object->getWorldName(), object->getBodyName(), center1, center2, radius, density, friction, restitution);
+            b2ShapeId createShapeCapsule(game::Object* object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution, bool sensor){
+                return createShapeCapsule(object->getWorldName(), object->getBodyName(), center1, center2, radius, density, friction, restitution, sensor);
             }
-            b2ShapeId createShapePolygon(game::Object* object, std::vector<b2Vec2> points, float rounded,  sf::Vector2f offset, float density, float friction, float restitution){
-                return createShapePolygon(object->getWorldName(), object->getBodyName(), points, rounded, offset, density, friction, restitution);
+            b2ShapeId createShapePolygon(game::Object* object, std::vector<b2Vec2> points, float rounded,  sf::Vector2f offset, float density, float friction, float restitution, bool sensor){
+                return createShapePolygon(object->getWorldName(), object->getBodyName(), points, rounded, offset, density, friction, restitution, sensor);
             }
-            b2ShapeId createShapeRectangle(game::Object* object, sf::Vector2f size, float radius, float rotationDeg , sf::Vector2f offset, float density, float friction, float restitution){
-                return createShapeRectangle(object->getWorldName(), object->getBodyName(), size, radius, rotationDeg, offset, density, friction, restitution);
+            b2ShapeId createShapeRectangle(game::Object* object, sf::Vector2f size, float radius, float rotationDeg , sf::Vector2f offset, float density, float friction, float restitution, bool sensor){
+                return createShapeRectangle(object->getWorldName(), object->getBodyName(), size, radius, rotationDeg, offset, density, friction, restitution, sensor);
             }
-            b2ShapeId createShapeSegment(game::Object* object, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution){
-                return createShapeSegment(object->getWorldName(), object->getBodyName(), point1, point2, density, friction, restitution);
+            b2ShapeId createShapeSegment(game::Object* object, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution, bool sensor){
+                return createShapeSegment(object->getWorldName(), object->getBodyName(), point1, point2, density, friction, restitution, sensor);
             }
 
             b2BodyId& get(game::Object* object){
@@ -444,6 +496,12 @@ namespace game{
             }
             b2BodyId& get(std::string world, std::string body){
                 return bodyMap[world][body].id;
+            }
+
+            void setSensorOn(std::string world, std::string body, bool flag){
+                b2ShapeId shape;
+                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
+                b2Shape_EnableSensorEvents(shape, flag);
             }
 
             void destroy(game::Object* object){
@@ -551,65 +609,90 @@ namespace game{
                 b2Body_SetType(bodyMap[world][body].id, type);
             }
             void setDensity(std::string world, std::string body, float density){
-                b2ShapeId shape;
-                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
-                b2Shape_SetDensity(shape, density, true);
+                unsigned int shapeCount = b2Body_GetShapeCount(bodyMap[world][body].id);
+                std::vector<b2ShapeId> shapes(shapeCount);
+                b2Body_GetShapes(bodyMap[world][body].id, shapes.data(), shapeCount);
+
+                for(auto shape: shapes){
+                    b2Shape_SetDensity(shape, density, true);
+                }
+                shapes.clear();
             }
             void setFriction(std::string world, std::string body, float friction){
-                b2ShapeId shape;
-                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
-                b2Shape_SetFriction(shape, friction);
+                unsigned int shapeCount = b2Body_GetShapeCount(bodyMap[world][body].id);
+                std::vector<b2ShapeId> shapes(shapeCount);
+                b2Body_GetShapes(bodyMap[world][body].id, shapes.data(), shapeCount);
+
+                for(auto shape: shapes){
+                    b2Shape_SetFriction(shape, friction);
+                }
+                shapes.clear();
             }
             void setRestitution(std::string world, std::string body, float restitution){
-                b2ShapeId shape;
-                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
-                b2Shape_SetRestitution(shape, restitution);
+                unsigned int shapeCount = b2Body_GetShapeCount(bodyMap[world][body].id);
+                std::vector<b2ShapeId> shapes(shapeCount);
+                b2Body_GetShapes(bodyMap[world][body].id, shapes.data(), shapeCount);
+
+                for(auto shape: shapes){
+                    b2Shape_SetRestitution(shape, restitution);
+                }
+                shapes.clear();
             }
             void setFixRotation(std::string world, std::string body, bool fixRotation){
                 bodyMap[world][body].def.motionLocks.angularZ = fixRotation;
             }
             void setFilterMask(std::string world, std::string body, ObjectFilterType objectFilterType){
-                b2ShapeId shape;
-                b2Filter filter;
-                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
-                filter = b2Shape_GetFilter(shape);
-                filter.maskBits = (uint64_t) objectFilterType;
-                b2Shape_SetFilter(shape, filter);
+                unsigned int shapeCount = b2Body_GetShapeCount(bodyMap[world][body].id);
+                std::vector<b2ShapeId> shapes(shapeCount);
+                b2Body_GetShapes(bodyMap[world][body].id, shapes.data(), shapeCount);
+
+                for(auto shape: shapes){
+                    b2Filter filter;
+                    filter = b2Shape_GetFilter(shape);
+                    filter.maskBits = (uint64_t) objectFilterType;
+                    b2Shape_SetFilter(shape, filter);
+                }
+                shapes.clear();
             }
             void setFilterCategory(std::string world, std::string body, ObjectFilterType objectFilterType, bool autoSet){
-                b2ShapeId shape;
-                b2Filter filter;
-                b2Body_GetShapes(bodyMap[world][body].id, &shape, 1);
-                filter = b2Shape_GetFilter(shape);
-                filter.categoryBits = (uint64_t) objectFilterType;
-                if(autoSet){
-                    switch(objectFilterType){
-                        case NO_BODY:
-                        filter.maskBits = NO_BODY_MASK;
-                        break;
-                        case GROUND:
-                        filter.maskBits = GROUND_MASK;
-                        break;
-                        case SOLID:
-                        filter.maskBits = SOLID_MASK;
-                        break;
-                        case SCENE_OBJECT:
-                        filter.maskBits = SCENE_OBJECT_MASK;
-                        break;
-                        case GHOST:
-                        filter.maskBits = GHOST_MASK;
-                        break;
-                        case ATTACK:
-                        filter.maskBits = ATTACK_MASK;
-                        break;
-                        case GHOST_ATTACK:
-                        filter.maskBits = GHOST_ATTACK_MASK;
-                        break;
-                        default:
-                        filter.maskBits = NO_BODY_MASK;
+                unsigned int shapeCount = b2Body_GetShapeCount(bodyMap[world][body].id);
+                std::vector<b2ShapeId> shapes(shapeCount);
+                b2Body_GetShapes(bodyMap[world][body].id, shapes.data(), shapeCount);
+
+                for(auto shape: shapes){
+                    b2Filter filter;
+                    filter = b2Shape_GetFilter(shape);
+                    filter.categoryBits = (uint64_t) objectFilterType;
+                    if(autoSet){
+                        switch(objectFilterType){
+                            case NO_BODY:
+                            filter.maskBits = NO_BODY_MASK;
+                            break;
+                            case GROUND:
+                            filter.maskBits = GROUND_MASK;
+                            break;
+                            case SOLID:
+                            filter.maskBits = SOLID_MASK;
+                            break;
+                            case SCENE_OBJECT:
+                            filter.maskBits = SCENE_OBJECT_MASK;
+                            break;
+                            case GHOST:
+                            filter.maskBits = GHOST_MASK;
+                            break;
+                            case ATTACK:
+                            filter.maskBits = ATTACK_MASK;
+                            break;
+                            case GHOST_ATTACK:
+                            filter.maskBits = GHOST_ATTACK_MASK;
+                            break;
+                            default:
+                            filter.maskBits = NO_BODY_MASK;
+                        }
                     }
+                    b2Shape_SetFilter(shape, filter);
                 }
-                b2Shape_SetFilter(shape, filter);
+                shapes.clear();
             }
 
             void setPosition(game::Object* object, sf::Vector2f position){
@@ -648,12 +731,12 @@ namespace game{
 
             // Use shared_ptr<Object> to call functions
 
-            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type, bool fixRotation){return create(world, bodyName, object.get(), position, type, fixRotation);}
-            b2ShapeId createShapeCircle(std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density, float friction, float restitution){return createShapeCircle(object.get(), center, radius, density, friction, restitution);}
-            b2ShapeId createShapeCapsule(std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution){return createShapeCapsule(object.get(), center1, center2, radius, density, friction, restitution);}
-            b2ShapeId createShapePolygon(std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded, sf::Vector2f offset, float density, float friction, float restitution){return createShapePolygon(object.get(), points, rounded, offset, density, friction, restitution);}
-            b2ShapeId createShapeRectangle(std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded, float rotationDeg , sf::Vector2f offset, float density, float friction, float restitution){return createShapeRectangle(object.get(), size, rounded, rotationDeg, offset, density, friction, restitution);}
-            b2ShapeId createShapeSegment(std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution){return createShapeSegment(object.get(), point1, point2, density, friction, restitution);}
+            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type, bool fixRotation, void* data){return create(world, bodyName, object.get(), position, type, fixRotation, data);}
+            b2ShapeId createShapeCircle(std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density, float friction, float restitution, bool sensor){return createShapeCircle(object.get(), center, radius, density, friction, restitution, sensor);}
+            b2ShapeId createShapeCapsule(std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density, float friction, float restitution, bool sensor){return createShapeCapsule(object.get(), center1, center2, radius, density, friction, restitution, sensor);}
+            b2ShapeId createShapePolygon(std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded, sf::Vector2f offset, float density, float friction, float restitution, bool sensor){return createShapePolygon(object.get(), points, rounded, offset, density, friction, restitution, sensor);}
+            b2ShapeId createShapeRectangle(std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded, float rotationDeg , sf::Vector2f offset, float density, float friction, float restitution, bool sensor){return createShapeRectangle(object.get(), size, rounded, rotationDeg, offset, density, friction, restitution, sensor);}
+            b2ShapeId createShapeSegment(std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density, float friction, float restitution, bool sensor){return createShapeSegment(object.get(), point1, point2, density, friction, restitution, sensor);}
             b2BodyId& get(std::shared_ptr<game::Object> object){return get(object.get());}
             void destroy(std::shared_ptr<game::Object> object){destroy(object.get());}
             bool exists(std::shared_ptr<game::Object> object){return exists(object.get());}

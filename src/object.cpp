@@ -1,11 +1,9 @@
-#include <SFML/Graphics/Sprite.hpp>
-#include <SFML/System/Vector2.hpp>
-#include <SFML/Window/Event.hpp>
-#include <SFML/Window/Keyboard.hpp>
+#include <SFML/Graphics.hpp>
 #include <object.hpp>
 #include <physic.hpp>
 #include <resource.hpp>
-#include "animation.hpp"
+#include <animation.hpp>
+#include <thread>
 
 namespace game {
     Object::Ptr Object::create() { return std::make_shared<Object>(); }
@@ -20,6 +18,21 @@ namespace game {
 
     Object::~Object() {
         this->m_animations.clear();
+
+        // b2BodyId bodyId = game::physic::body::get(this);
+        // unsigned int shapeCount = b2Body_GetShapeCount(bodyId);
+        // b2ShapeId* shapes = new b2ShapeId[shapeCount];
+        // b2Body_GetShapes(bodyId, shapes, shapeCount);
+
+        // for(auto [sensor, rect]: this->m_sensors){
+        //     for(unsigned int i=0; i<shapeCount; i++){
+        //         if(b2Shape_IsSensor(shapes[i])){
+        //             void* data = b2Shape_GetUserData(shapes[i]);
+        //             if(data) delete data;
+        //         }
+        //     }
+        // }
+        // delete shapes;
     }
 
     sf::Sprite& Object::sprite() { return this->m_animation.second->sprite(); }
@@ -39,26 +52,22 @@ namespace game {
                 position.y -= (rect.size.y * scale.y) / 2;
                 sprite.setPosition(position);
 
-                if(this->m_friction > 0.7) this->setFriction(this->m_friction-5);
-                else if(this->m_friction < 0.7) this->setFriction(0.7f);
-                if(this->m_friction > 0.7) std::cout << this->m_friction << std::endl;
+                if(this->m_friction > 0.7) this->m_friction -= 8;
+                if(this->m_friction < 0.7) this->m_friction = 0.7;
 
-                if(this->m_grounded){
-                    sf::Vector2f velocity = game::physic::body::getVelocity(this);
-                    if((std::abs((int)velocity.y)) > 0.1) this->m_grounded = false;
-                }
+                this->setFriction(this->m_friction);
+
+                // if(this->m_grounded){
+                //     sf::Vector2f velocity = game::physic::body::getVelocity(this);
+                //     if((std::abs((int)velocity.y)) > 0.1) this->m_grounded = false;
+                // }
             }
 
-            this->m_animation.second->update();
-
-            // if (this->m_animations.contains(this->m_animation)) {
-            //     if (!this->m_animationDelayCur) {
-            //         this->m_animationDelayCur = this->m_animationDelay + 1;
-            //         this->m_animationIndex = (this->m_animationIndex + 1) % this->m_animations[this->m_animation].size();
-            //         this->m_sprite->setTextureRect(this->m_animations[this->m_animation][this->m_animationIndex]);
-            //     }
-            //     this->m_animationDelayCur--;
+            // for(auto [sensor, rect]: this->m_sensors){
+            //     game::physic::body::setPosition(this->m_worldName, sensor, game::physic::body::getPosition(this));
             // }
+
+            this->m_animation.second->update();
         }
 
         for(auto [key, callback]: this->m_callbacks){
@@ -73,30 +82,25 @@ namespace game {
     bool Object::isDrawable() { return this->m_drawable; }
     bool Object::isGrounded() { return this->m_grounded; }
     void Object::jump() {
-        if(!this->m_grounded) return;
-
-        physic::body::applyForce(this->getWorldName(), this->getBodyName(), {0.0, -game::physic::body::BASE_FORCE*this->m_force});
+        if(this->m_grounded){
+            physic::body::applyForce(this->m_worldName, this->getBodyName(), {0.0, -game::physic::body::BASE_FORCE*this->m_force});
+        }
+        if(!this->m_grounded && this->m_friction > 20){
+            physic::body::setFriction(this, 0.7);
+            physic::body::applyForce(this->m_worldName, this->getBodyName(), {0.0, -game::physic::body::BASE_FORCE*this->m_force});
+        }
     }
 
-    // AnimationMap Object::animations() { return this->m_animations; }
     Animation::Ptr Object::createAnimation(std::string key, std::pair<std::string, sf::Texture*> texture){
         auto animation = Animation::create(texture);
         this->m_animations[key] = animation;
         return animation;
     }
-    // void Object::addAnimation(std::string key, sf::IntRect rect) { this->m_animations[key].emplace_back(rect); }
     void Object::removeAnimation(std::string key) {
         if (this->m_animations.contains(key)) {
             this->m_animations.erase(key);
         }
     }
-    // void Object::removeAnimationFrame(std::string key, unsigned int frame) {
-    //     if (this->m_animations.contains(key)) {
-    //         if (this->m_animations[key].size() > frame) {
-    //             this->m_animations[key].erase(this->m_animations[key].begin() + frame);
-    //         }
-    //     }
-    // }
     void Object::setAnimation(std::string key) {
         if(!this->m_animations.contains((key))) return;
 
@@ -105,11 +109,29 @@ namespace game {
         this->m_animation.second->resetFrame();
     }
     std::pair<std::string, Animation::Ptr> Object::getAnimation() { return this->m_animation; }
+    void Object::createSensor(std::string sensorName, sf::Vector2f size, sf::Vector2f offset, game::physic::world::SensorType type){
+        // game::physic::body::create(this->m_worldName, sensorName, nullptr, {0, 0}, b2_staticBody, true, this);
+        // auto shapeId = game::physic::body::createShapeRectangle(this->getWorldName(), sensorName, size, 0.0, 0.0, offset, 0.01, 0.3, 0.0, true);
+        // game::physic::body::setFilterMask(this->m_worldName, sensorName, game::physic::body::ObjectFilterType::GROUND);
+        // b2Shape_SetUserData(shapeId, (void*) type);
 
-    // void Object::setDelay(uint16_t delay) {
-    //     this->m_animationDelay = delay;
-    //     this->m_animationDelayCur = delay;
-    // }
+        auto shapeId = game::physic::body::createShapeRectangle(this->m_worldName, this->m_bodyName, size, 0.0, 0.0, offset, 0.01, 0.3, 0.0, true);
+        game::physic::body::setFilterMask(this->m_worldName, this->m_bodyName, game::physic::body::ObjectFilterType::GROUND);
+        b2Shape_SetUserData(shapeId, (void*) type);
+
+        this->m_sensors[sensorName] = {offset, size};
+    }
+
+    void Object::linkSensor(std::string sensorName, sf::Vector2f offset){ this->m_sensors[sensorName] = {offset, {0,0}}; }
+    void Object::unlinkSensor(std::string sensorName){
+        if(this->m_sensors.contains(sensorName)){
+            this->m_sensors.erase(sensorName);
+        }
+    }
+    void Object::setSensorOffset(std::string sensorName, sf::Vector2f offset){ this->m_sensors[sensorName].position = offset; }
+    void Object::enabledSensor(std::string sensorName, bool flag){ game::physic::body::setSensorOn(this->m_worldName, sensorName, flag); }
+    sf::FloatRect Object::getSensorRect(std::string sensorName){ return this->m_sensors[sensorName]; }
+
     void Object::setDrawable(bool drawable){ this->m_drawable = drawable; }
     void Object::setBodyName(std::string bodyName) { this->m_bodyName = bodyName; }
     void Object::setWorldName(std::string worldName) { this->m_worldName = worldName; }
@@ -122,7 +144,6 @@ namespace game {
         game::physic::body::setFriction(this, friction);
     }
 
-    // uint16_t Object::getDelay() { return this->m_animationDelay; }
     std::string Object::getBodyName() { return this->m_bodyName; }
     std::string Object::getWorldName() { return this->m_worldName; }
     std::string Object::getTextureName() { return this->m_texture; }

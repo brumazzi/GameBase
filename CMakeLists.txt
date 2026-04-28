@@ -2,12 +2,13 @@ cmake_minimum_required(VERSION 3.31.5)
 
 set(CMAKE_CXX_STANDARD 20)
 set(PROJECT_NAME Game)
-set(CMAKE_CXX_FLAGS "-O2 -Wl,-rpath=./lib64 -L./lib64 -rdynamic -g")
+set(CMAKE_CXX_FLAGS "-O2 -Wall -Wl,-rpath=./lib64 -L./lib64 -rdynamic -g")
 set(PKG_CONFIG_LIBS yaml-cpp)
 set(STATIC_LIBS unistring dl imgui-sfml box2d m sfml-audio sfml-graphics sfml-system sfml-window)
 set(SHARED_LIBS tinyxml2 GL glfw)
 
 set(SOURCE_FILES
+    src/animation.cpp
     src/effect.cpp
     src/game.cpp
     src/main.cpp

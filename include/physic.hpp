@@ -5,6 +5,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <iostream>
 #include <box2d/box2d.h>
+#include <box2d/id.h>
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
 #include <memory>
@@ -14,6 +15,11 @@ namespace game{
 
     namespace physic{
         namespace world{
+            typedef enum SensorType{
+                NO_SENSOR           = 0,
+                GROUNDED_SENSOR     = 1,
+            }SensorType;
+
             b2WorldId& create(double gravityX, double gravityY, std::string world = "default");
             b2WorldId& create(sf::Vector2f gravity, std::string world = "default");
             b2WorldId& get(std::string world = "default");
@@ -28,8 +34,8 @@ namespace game{
 
             void update(std::string world = "default");
             void update(std::vector<std::string> worlds);
-            void eventBeginTouch(std::string world = "default");
-            void eventEndTouch(std::string world = "default");
+            void eventTouch(std::string world = "default");
+            void eventSensor(std::string world = "default");
             void eventHit(std::string world = "default");
 
             void drawLines(sf::RenderWindow& render);
@@ -44,17 +50,19 @@ namespace game{
                 SCENE_OBJECT    = 1 << 2,
                 GHOST           = 1 << 3,
                 ATTACK          = 1 << 4,
-                GHOST_ATTACK    = 1 << 5
+                GHOST_ATTACK    = 1 << 5,
+                SENSOR          = 1 << 6
             };
 
             enum ObjectFilterTypeMask{
                 NO_BODY_MASK        = 0,
-                GROUND_MASK         = ObjectFilterType::SOLID | ObjectFilterType::SCENE_OBJECT | ObjectFilterType::ATTACK,
-                SOLID_MASK          = ObjectFilterType::SOLID | ObjectFilterType::ATTACK | ObjectFilterType::GHOST_ATTACK | ObjectFilterType::GROUND,
+                GROUND_MASK         = ObjectFilterType::SOLID | ObjectFilterType::SCENE_OBJECT | ObjectFilterType::ATTACK | ObjectFilterType::SENSOR,
+                SOLID_MASK          = ObjectFilterType::SOLID | ObjectFilterType::ATTACK | ObjectFilterType::GHOST_ATTACK | ObjectFilterType::GROUND | ObjectFilterType::SENSOR,
                 SCENE_OBJECT_MASK   = ObjectFilterType::ATTACK | ObjectFilterType::GHOST_ATTACK | ObjectFilterType::GROUND,
                 GHOST_MASK          = ObjectFilterType::ATTACK | ObjectFilterType::GHOST_ATTACK,
                 ATTACK_MASK         = ObjectFilterType::SOLID | ObjectFilterType::SCENE_OBJECT | ObjectFilterType::GROUND,
-                GHOST_ATTACK_MASK   = ObjectFilterType::SOLID | ObjectFilterType::SCENE_OBJECT
+                GHOST_ATTACK_MASK   = ObjectFilterType::SOLID | ObjectFilterType::SCENE_OBJECT,
+                SENSOR_MASK         = ObjectFilterType::GROUND | ObjectFilterType::SOLID
             };
 
             enum ShapeType{
@@ -68,23 +76,24 @@ namespace game{
 
             const float BASE_FORCE = 460.0f;
 
-            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true);
+            b2BodyId& create(std::string world, std::string bodyName, game::Object* object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true, void* data = 0x00);
 
-            b2ShapeId createShapeCircle(std::string world, std::string bodyName, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeCapsule(std::string world, std::string bodyName, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapePolygon(std::string world, std::string bodyName, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeRectangle(std::string world, std::string bodyName, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeSegment(std::string world, std::string bodyName, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2ShapeId createShapeCircle(std::string world, std::string bodyName, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeCapsule(std::string world, std::string bodyName, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapePolygon(std::string world, std::string bodyName, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeRectangle(std::string world, std::string bodyName, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeSegment(std::string world, std::string bodyName, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
 
-            b2ShapeId createShapeCircle(game::Object* object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeCapsule(game::Object* object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapePolygon(game::Object* object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeRectangle(game::Object* object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeSegment(game::Object* object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-
+            b2ShapeId createShapeCircle(game::Object* object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeCapsule(game::Object* object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapePolygon(game::Object* object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeRectangle(game::Object* object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeSegment(game::Object* object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
 
             b2BodyId& get(game::Object* object);
             b2BodyId& get(std::string world, std::string body);
+
+            void setSensorOn(std::string world, std::string body, bool flag);
 
             void destroy(game::Object* object);
             void destroy(std::string world, std::string body);
@@ -138,12 +147,12 @@ namespace game{
             void setFilterMask(game::Object* object, ObjectFilterType objectFilterType);
             void setFilterCategory(game::Object* object, ObjectFilterType objectFilterType, bool autoSet = true);
 
-            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true);
-            b2ShapeId createShapeCircle(std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeCapsule(std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapePolygon(std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeRectangle(std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0);
-            b2ShapeId createShapeSegment(std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0);
+            b2BodyId& create(std::string world, std::string bodyName, std::shared_ptr<game::Object> object, sf::Vector2f position, b2BodyType type = b2_staticBody, bool fixRotation = true, void* data = 0x00);
+            b2ShapeId createShapeCircle(std::shared_ptr<game::Object> object, sf::Vector2f center, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeCapsule(std::shared_ptr<game::Object> object, sf::Vector2f center1, sf::Vector2f center2, float radius, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapePolygon(std::shared_ptr<game::Object> object, std::vector<b2Vec2> points, float rounded = 0.0, sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeRectangle(std::shared_ptr<game::Object> object, sf::Vector2f size, float rounded = 0.0, float rotationDeg = 0.0 , sf::Vector2f offset = {.0, .0}, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
+            b2ShapeId createShapeSegment(std::shared_ptr<game::Object> object, sf::Vector2f point1, sf::Vector2f point2, float density = 0.03, float friction = 0.7, float restitution = 0.0, bool sensor = false);
             b2BodyId& get(std::shared_ptr<game::Object> object);
             void destroy(std::shared_ptr<game::Object> object);
             bool exists(std::shared_ptr<game::Object> object);
